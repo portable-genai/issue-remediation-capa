@@ -1,0 +1,11 @@
+# Thematic-clustering oracle (obviously fictional). Each row is one issue with its text and an
+# INDEPENDENT gold theme label. The embedder + clusterer group the issues, and theme_purity scores
+# the clustering against these gold labels (standard cluster-purity). Issues in one gold theme
+# share vocabulary so the deterministic hashing embedder places them together; a clusterer that
+# merged the two groups scores below 1.0, so the metric can go red.
+{"id": "aud3-t1", "text": "residency control bucket outside region storage location", "gold": "residency"}
+{"id": "aud3-t2", "text": "data residency region storage bucket location violation", "gold": "residency"}
+{"id": "aud3-t3", "text": "residency region storage location control archive tier", "gold": "residency"}
+{"id": "aud3-e1", "text": "encryption key rotation cmek disabled production dataset", "gold": "encryption"}
+{"id": "aud3-e2", "text": "cmek encryption key management rotation disabled", "gold": "encryption"}
+{"id": "aud3-e3", "text": "key encryption cmek management production rotation", "gold": "encryption"}

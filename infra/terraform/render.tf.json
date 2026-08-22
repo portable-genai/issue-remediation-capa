@@ -1,0 +1,8 @@
+{
+  "locals": {
+    "render_region": "asia-southeast1",
+    "render_package_name": "issue_remediation_capa",
+    "render_env_prefix": "CAPA",
+    "render_catalog_id": "Aud3"
+  }
+}
