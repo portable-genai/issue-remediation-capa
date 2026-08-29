@@ -42,7 +42,7 @@ Four things, and two of them are code here:
 3. **Your holiday calendar.** The business-day maths takes the holiday set as an argument and
    never assumes one, which is correct but means somebody has to supply it, per jurisdiction, and
    keep it current. A wrong calendar moves every due date.
-4. **The review console.** An Hrz7 deployment reachable at `HRZ_HUMAN_REVIEW_URL`. The managed
+4. **The review console.** An Hrz7 deployment reachable at `HUMAN_REVIEW_URL`. The managed
    router REFUSES to swallow an escalation when this is empty, so a fork cannot ship rule R8
    unwired and green, and the approved reference it returns is what a closure requires.
 

@@ -160,7 +160,7 @@ rather than tracking remediation themselves. What it integrates rather than rebu
 - **Hrz7** human-review / maker-checker console: every escalation is routed to it over the shared
   `review-kit` (rule R8), and the approved review reference it returns is the SAME thing
   `plan_transition` demands before an issue may close. You wire your endpoint
-  (`HRZ_HUMAN_REVIEW_URL`); you do not re-implement the console.
+  (`HUMAN_REVIEW_URL`); you do not re-implement the console.
 - **Hrz5** observability plus immutable WORM audit: audit events and trace spans go to it through
   `AuditSinkPort` and `ObservabilityTracerPort`.
 - **Hrz4** AI-quality / model-risk gate: owns promotion. `eval/run_eval.py --mode gate` is the
