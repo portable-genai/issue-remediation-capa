@@ -49,6 +49,7 @@ fastapi==0.141.1
 google-api-core==2.34.0
     # via
     #   google-cloud-appengine-logging
+    #   google-cloud-bigquery
     #   google-cloud-core
     #   google-cloud-logging
 google-auth==2.57.0
@@ -56,16 +57,25 @@ google-auth==2.57.0
     #   issue-remediation-capa (pyproject.toml)
     #   google-api-core
     #   google-cloud-appengine-logging
+    #   google-cloud-bigquery
     #   google-cloud-core
     #   google-cloud-logging
 google-cloud-appengine-logging==1.10.0
     # via google-cloud-logging
 google-cloud-audit-log==0.6.2
     # via google-cloud-logging
+google-cloud-bigquery==3.44.0
+    # via issue-remediation-capa (pyproject.toml)
 google-cloud-core==2.7.0
-    # via google-cloud-logging
+    # via
+    #   google-cloud-bigquery
+    #   google-cloud-logging
 google-cloud-logging==3.16.3
     # via issue-remediation-capa (pyproject.toml)
+google-crc32c==1.8.0
+    # via google-resumable-media
+google-resumable-media==2.10.2
+    # via google-cloud-bigquery
 googleapis-common-protos==1.75.2
     # via
     #   google-api-core
@@ -101,6 +111,8 @@ idna==3.19
     #   requests
 opentelemetry-api==1.44.0
     # via google-cloud-logging
+packaging==26.3
+    # via google-cloud-bigquery
 pii-kit @ git+https://github.com/portable-genai/pii-kit@654493048a8434d645757cc916bb9d446313688f
     # via issue-remediation-capa (pyproject.toml)
 proto-plus==1.28.4
@@ -128,12 +140,18 @@ pydantic==2.13.5
     # via fastapi
 pydantic-core==2.46.5
     # via pydantic
+python-dateutil==2.9.0.post0
+    # via google-cloud-bigquery
 pyyaml==6.0.3
     # via issue-remediation-capa (pyproject.toml)
 requests==2.34.2
-    # via google-api-core
+    # via
+    #   google-api-core
+    #   google-cloud-bigquery
 review-kit @ git+https://github.com/portable-genai/review-kit@47c05c64fa115d9aa07c0f349be5ec5d807bbe95
     # via issue-remediation-capa (pyproject.toml)
+six==1.17.0
+    # via python-dateutil
 starlette==1.6.0
     # via
     #   fastapi
