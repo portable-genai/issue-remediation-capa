@@ -1,10 +1,12 @@
 """IssueIntakePort: the feed-agnostic boundary that pulls raw issue records per source.
 
-Aud3 is fed by five sources (Aud1 findings, Aud2 exceptions, the Rsk1 horizon change-feed, Doc6
-findings and loss events). Each has its own transport in a real deployment; this port hides that
-behind one method that returns raw records for a named source, which the domain then NORMALIZES
-into the shared :class:`~..domain.capa.IssueEnvelope`. The deferred Rgc10 / Rgc13 feeders have no
-adapter, which is exactly why the source is an extensible enum rather than a fixed set of methods.
+issue-remediation-capa is fed by five sources (internal-audit-lifecycle findings,
+continuous-controls-monitoring exceptions, the compliance-advisory horizon change-feed,
+complaints-review findings and loss events). Each has its own transport in a real deployment; this
+port hides that behind one method that returns raw records for a named source, which the domain then
+NORMALIZES into the shared :class:`~..domain.capa.IssueEnvelope`. The deferred
+breach-reportability-assessor / whistleblower-triage feeders have no adapter, which is exactly why
+the source is an extensible enum rather than a fixed set of methods.
 
 The domain stays pure: this is a Protocol. The adapters (not this module) read a fixture set
 offline, reach the real feeds under the managed profile, and fail fast on-premises.

@@ -1,4 +1,4 @@
-# Issue Remediation and CAPA Tracker (Aud3)
+# Issue Remediation and CAPA Tracker (`issue-remediation-capa`)
 
 Post-finding issue and CAPA lifecycle to closure with SLA, aging and thematic clustering.
 
@@ -7,28 +7,28 @@ decision is pure, deterministic stdlib; PII is redacted before anything is audit
 carries a citation; and a consequential result is ROUTED to a human reviewer (rule R8) rather than
 auto-executed or left in a flag nobody reads.
 
-## The domain (Aud3)
+## The domain (`issue-remediation-capa`)
 
-Aud3 OWNS the post-finding lifecycle of audit, exam and incident issues and their corrective and
+`issue-remediation-capa` OWNS the post-finding lifecycle of audit, exam and incident issues and their corrective and
 preventive actions, to closure. The engine lives in `src/issue_remediation_capa/domain/`:
 
-- **Feed-agnostic intake** (`domain/capa.py`, `pipeline.py`): five sources (Aud1 findings, Aud2
-  exceptions, the Rsk1 horizon change-feed, Doc6 findings and loss events) normalize into one
+- **Feed-agnostic intake** (`domain/capa.py`, `pipeline.py`): five sources (`internal-audit-lifecycle` findings, `continuous-controls-monitoring`
+  exceptions, the `compliance-advisory` horizon change-feed, `complaints-review` findings and loss events) normalize into one
   `IssueEnvelope`; a schema-invalid record is DROPPED, never defaulted. The source is an
-  extensible enum, so the deferred Rgc10 and Rgc13 feeders are members with no adapter yet.
-- **The issue and CAPA lifecycle** on the Hrz7 case-spine shape (as configuration): a state
+  extensible enum, so the deferred `breach-reportability-assessor` and `whistleblower-triage` feeders are members with no adapter yet.
+- **The issue and CAPA lifecycle** on the `human-review-console` case-spine shape (as configuration): a state
   machine (`raised` to `rca_drafted` to `remediation_in_progress` to `closure_submitted` to
   `validated` to `closed`), business-day SLA and aging maths with an explicit `as_of` and a
   passed-in holiday set, and aging verdicts (SLA breach, approaching deadline, stuck in state).
   An illegal transition raises.
 - **Closure that cannot self-serve.** A config-owned evidence checklist per issue type, and the
-  engine refuses the transition to `closed` unless the checklist is complete AND an approved Hrz7
+  engine refuses the transition to `closed` unless the checklist is complete AND an approved `human-review-console`
   review reference is present. The model may DRAFT the root-cause note (`domain/rca.py`,
   schema-validated and discarded on failure), but it can never satisfy a checklist item or close
   an issue.
 - **Thematic analysis** (`domain/themes.py`): deterministic clustering over an embeddings port
   (Vertex under `gcp`, a deterministic hashing embedder under `local`) into systemic themes with
-  member citations, exposed one-way and read-only to Erm1 at `GET /v1/themes`.
+  member citations, exposed one-way and read-only to `rcsa-kri-erm` at `GET /v1/themes`.
 
 Every consequential result is deterministic and is scored in the eval against an INDEPENDENT
 oracle (`eval/datasets/capa_oracle.jsonl`, `themes_oracle.jsonl`): `normalization_accuracy`,
@@ -93,7 +93,7 @@ See `docs/runbook.md`.
 | Package | Used for |
 |---|---|
 | `hex-service-kit` | `Principal` / `IdentityPort` / seeded personas, fail-closed bind + CORS, `make_require_service_caller` / the app-object exposure guard / security headers (the end-user dependency is this repo's own, so a deployment that can authenticate nobody answers with a status and a reason rather than a blanket 401), the hash-chained WORM audit log, `StrEnum` taxonomies |
-| `agent-eval-kit` | the `--mode smoke\|gate` scaffold, the Hrz4 gate client, the not-falsely-green harness |
+| `agent-eval-kit` | the `--mode smoke\|gate` scaffold, the `model-quality-gate` client, the not-falsely-green harness |
 | `pii-kit` | the jurisdiction PII pattern pack the triage service redacts with |
 | `review-kit` | the rule R8 producer path: the review payload, the submission client and the outbox |
 

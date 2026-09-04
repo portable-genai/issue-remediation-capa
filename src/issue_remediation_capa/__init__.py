@@ -1,4 +1,4 @@
-"""Issue Remediation and CAPA Tracker (Aud3).
+"""Issue Remediation and CAPA Tracker (issue-remediation-capa).
 
 Post-finding issue and CAPA lifecycle to closure with SLA, aging and thematic clustering.
 

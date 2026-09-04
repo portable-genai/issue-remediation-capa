@@ -1,10 +1,12 @@
-"""Thematic analysis: deterministic clustering of issues into systemic themes (the Erm1 feed).
+"""Thematic analysis: deterministic clustering of issues into systemic themes (the rcsa-kri-erm
+feed).
 
-Aud3 surfaces systemic root-cause patterns across many issues, and feeds those THEMES one-way to
-Erm1 as a risk signal. The embedding of each issue is produced OUTSIDE this module, behind the
-:class:`~..ports.embeddings.EmbeddingsPort` (a real Vertex model under ``gcp``, a deterministic
-hashing embedder under ``local``); this module takes the vectors and clusters them with PURE
-stdlib maths, so a given set of vectors plus a threshold always yields byte-identical themes.
+issue-remediation-capa surfaces systemic root-cause patterns across many issues, and feeds those
+THEMES one-way to rcsa-kri-erm as a risk signal. The embedding of each issue is produced OUTSIDE
+this module, behind the :class:`~..ports.embeddings.EmbeddingsPort` (a real Vertex model under
+``gcp``, a deterministic hashing embedder under ``local``); this module takes the vectors and
+clusters them with PURE stdlib maths, so a given set of vectors plus a threshold always yields
+byte-identical themes.
 
 Clustering is greedy single-pass over issues sorted by id: each issue joins the first existing
 theme whose centroid is within the cosine threshold, or opens a new one. That is deterministic by

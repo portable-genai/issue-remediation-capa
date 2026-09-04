@@ -11,7 +11,7 @@ console script), the `CAPA_` env prefix (including the bare token that
 `infra/terraform/render.tf.json` carries, so Terraform sets the same variable names on the
 service), the Terraform `name_prefix` resource stem (`aud3-svc`) and the distribution / git id in
 one pass. Preview with `--dry-run`, apply with `--yes`, then recreate the venv, `make install`,
-and run `make gate`. The catalog id `Aud3` is left alone unless you pass `--catalog-id`, so a fork
+and run `make gate`. The catalog id `issue-remediation-capa` is left alone unless you pass `--catalog-id`, so a fork
 stays traceable to the entry it descends from. The script does the mechanical rename; the human
 decisions (region, IdP, your feeds and their normalizers, the remediation clock and closure
 checklists, the theme threshold, the eval golden set) are the checklist in `ADOPTING.md`.
@@ -42,7 +42,7 @@ Four things, and two of them are code here:
 3. **Your holiday calendar.** The business-day maths takes the holiday set as an argument and
    never assumes one, which is correct but means somebody has to supply it, per jurisdiction, and
    keep it current. A wrong calendar moves every due date.
-4. **The review console.** An Hrz7 deployment reachable at `HUMAN_REVIEW_URL`. The managed
+4. **The review console.** An `human-review-console` deployment reachable at `HUMAN_REVIEW_URL`. The managed
    router REFUSES to swallow an escalation when this is empty, so a fork cannot ship rule R8
    unwired and green, and the approved reference it returns is what a closure requires.
 
@@ -53,7 +53,7 @@ Three edits and no redesign, which is the whole point of the extensible enum: a 
 each intake adapter (a fixture offline, a landing table under `gcp`, a raise on-premises).
 `IssueSource` is a `LenientStrEnum`, so an unrecognised value from a future release is read rather
 than crashed on, and `normalize_issue` raises for a source with no normalizer rather than guessing
-one. Rgc10 and Rgc13 are named in the code comments as the deferred feeders this shape is meant to
+one. `breach-reportability-assessor` and `whistleblower-triage` are named in the code comments as the deferred feeders this shape is meant to
 take, but neither is a member yet, so adding one of them is the same three edits. Add oracle rows
 to `eval/datasets/capa_oracle.jsonl` for the new source in the same change, or
 `normalization_accuracy` will pass without ever seeing it.
@@ -79,7 +79,7 @@ numbers as configuration rather than as code, plan that addition as part of adop
 
 ### Why are there two verticals in here?
 
-Because the render started from the template's generic triage service and the Aud3 CAPA engine was
+Because the render started from the template's generic triage service and the `issue-remediation-capa` engine was
 built alongside it. `domain/triage_service.py` (with `/v1/triage`, the CLI `triage` command and the
 `triage_case` agent tool) is scaffolding; `domain/capa.py`, `domain/themes.py` and `domain/rca.py`
 (with `/v1/issues/assess` and `/v1/themes`) are the reason this system exists. The triage path also
@@ -116,7 +116,7 @@ diverge, keep the step keys and the `facts` dict the checks read.
 
 [`../practices-audit.md`](../practices-audit.md) carries the per-check verdict and the work list.
 The three that matter most before production: the durable issue store (which is also what moves
-the closure preconditions off the request body), binding the Hrz1 guardrail gateway before
-upstream issue text reaches the drafter, and registering this repo's metric bundle with Hrz4 so
+the closure preconditions off the request body), binding the `agent-guardrail-gateway` before
+upstream issue text reaches the drafter, and registering this repo's metric bundle with `model-quality-gate` so
 `eval/run_eval.py --mode gate` has an authority to ask. The Terraform stack is written, validated
 and tested against a mocked provider; it has never been applied.

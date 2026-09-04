@@ -1,4 +1,4 @@
-"""FastAPI application for Issue Remediation and CAPA Tracker (Aud3).
+"""FastAPI application for Issue Remediation and CAPA Tracker (issue-remediation-capa).
 
 Import-safe (the Container is built at request time, never at import; only ``Settings`` is read
 at import, to learn which identity adapter is bound, and no adapter is constructed), identity is
@@ -301,7 +301,8 @@ def triage(
 ) -> TriageResponse:
     """Triage a case; the audit actor is the verified principal, never the request body.
 
-    Rule R8: a result that sets ``requires_human_review`` is ROUTED to the Hrz7 console here,
+    Rule R8: a result that sets ``requires_human_review`` is ROUTED to the human-review-console
+    here,
     in the same request that produced it. Setting the flag is not the escalation; routing is.
     The maker is the verified principal, so the console records who originated the decision.
     """
@@ -352,7 +353,8 @@ def assess_issue(
     request: IssueAssessRequest,
     principal: Annotated[Principal, Depends(get_principal)],
 ) -> IssueAssessResponse:
-    """Assess one issue's lifecycle; the consequential result is ROUTED to Hrz7 (rule R8).
+    """Assess one issue's lifecycle; the consequential result is ROUTED to human-review-console
+    (rule R8).
 
     The aging verdict, the closure gaps and the closure decision are the deterministic engine's,
     computed from the issue's own fields and an explicit ``as_of``. The bound model only DRAFTS the
@@ -400,10 +402,12 @@ def assess_issue(
 
 @app.get("/v1/themes", response_model=ThemesResponse, tags=["artifacts"])
 def themes(principal: Annotated[Principal, Depends(get_principal)]) -> ThemesResponse:
-    """The one-way, READ-ONLY theme feed Erm1 consumes (there is deliberately no write path).
+    """The one-way, READ-ONLY theme feed rcsa-kri-erm consumes (there is deliberately no write
+    path).
 
     Themes are the deterministic clustering of the normalized issues over the embeddings port. The
-    feed exposes clusters and their member citations and nothing that mutates state: Erm1 consumes,
+    feed exposes clusters and their member citations and nothing that mutates state: rcsa-kri-erm
+    consumes,
     it does not write back. The store is tenant-owned, authorised against the verified principal.
     """
     try:
