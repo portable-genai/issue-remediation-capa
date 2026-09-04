@@ -16,7 +16,7 @@ authors = [{ name = "Ashish Awasthi" }]
 # cloud SDKs live in the [gcp] extra so the local/onprem gate installs none of them.
 #
 # `review-kit` is not optional: rule R8 says a producer that sets `requires_human_review`
-# MUST route the item to the Hrz7 Human-Review console rather than terminate the escalation in a
+# MUST route the item to the human-review-console Human-Review console rather than terminate the escalation in a
 # per-repo boolean, and the ReviewRouterPort adapters are bound in EVERY profile.
 dependencies = [
   "pii-kit @ git+https://github.com/portable-genai/pii-kit@v0.0.1",

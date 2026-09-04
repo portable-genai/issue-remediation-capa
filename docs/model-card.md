@@ -1,4 +1,4 @@
-# Model card: Issue Remediation and CAPA Tracker (Aud3)
+# Model card: Issue Remediation and CAPA Tracker (`issue-remediation-capa`)
 
 This is a STARTER model card. It records the model boundary as built and the controls that must be
 completed before a managed deployment. The deterministic CAPA engine is the system of record. Two
@@ -36,7 +36,7 @@ a verdict or a closure.
   decision. The result reports `model_authored`, so the eval and the demo can tell the paths apart.
 - **The model can never close an issue.** The system instruction says so, and more importantly the
   engine enforces it: nothing in `domain/rca.py` can flip `closure_gaps`, and `plan_transition`
-  refuses `closed` without a complete checklist and an approved Hrz7 review reference.
+  refuses `closed` without a complete checklist and an approved `human-review-console` review reference.
 - The parsing and groundedness checks are module-level pure functions rather than private methods,
   deliberately: the `rca_groundedness` eval metric measures the RAW model output through the very
   same contract the service enforces. A metric that watched only the already-filtered service
@@ -50,7 +50,7 @@ a verdict or a closure.
   tool result can enter a model's context (`domain/pii.py`, `adapters/_review_payload.py`,
   `agent/tools.py`). Note the asymmetry that matters for review: the embedding call is the one path
   where issue subject and description leave the process unmasked under the managed profile.
-- Every consequential result sets `requires_human_review` and is routed to Hrz7 (rule R8) in the
+- Every consequential result sets `requires_human_review` and is routed to `human-review-console` (rule R8) in the
   same call; nothing auto-executes.
 
 ## Adapters and profiles
@@ -81,10 +81,10 @@ a verdict or a closure.
   `GET /v1/themes` fails rather than degrading.
 - **Evaluation of the live models**: the offline eval scores the deterministic pipeline with the
   stub generator and the hashing embedder against the golden set and both oracles. Add a
-  managed-profile run, registered with the Hrz4 promotion gate (P-08, rule R5), that scores
+  managed-profile run, registered with the `model-quality-gate` promotion gate (P-08, rule R5), that scores
   `rca_groundedness` with the real generation model bound and `theme_purity` with the real
   embedder bound.
-- **Prompt-injection screening** (rule R1): the Hrz1 guardrail gateway is not bound, and this repo
+- **Prompt-injection screening** (rule R1): the `agent-guardrail-gateway` is not bound, and this repo
   needs it. The facts block carries engine values rather than free text, which keeps the generation
   path narrow, but the issue subject and description that reach the EMBEDDING call are untrusted
   text from an upstream feed. Screen them, and fail closed to deterministic-only when the screen is

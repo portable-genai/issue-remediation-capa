@@ -79,7 +79,9 @@ def _assert_clean(rows: list[Mapping[str, Any]]) -> None:
 
 
 def _capa_record() -> IssueRecord:
-    """One overdue Aud1 issue whose citation title and snippet carry the planted identifiers."""
+    """One overdue internal-audit-lifecycle issue whose citation title and snippet carry the planted
+    identifiers.
+    """
     return IssueRecord(
         envelope=normalize_issue(sample_cases.PII_AUD1_RAW, IssueSource.AUD1_FINDING),
         state=LifecycleState.REMEDIATION_IN_PROGRESS,

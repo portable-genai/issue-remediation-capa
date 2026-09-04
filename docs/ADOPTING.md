@@ -1,6 +1,6 @@
 # Adopting this repo as your base
 
-This repository (Aud3, Issue Remediation and CAPA Tracker) is a **common base** that a bank or
+This repository (`issue-remediation-capa`, Issue Remediation and CAPA Tracker) is a **common base** that a bank or
 other regulated institution forks to build its own **system of record for the post-finding issue
 and CAPA lifecycle**: the service that normalizes issues from every upstream feed, runs them
 through a lifecycle state machine on a business-day remediation clock, refuses to close one
@@ -33,7 +33,7 @@ physical module split with an enforced dependency direction (practices-audit che
 | **Vertical (the register content)** | the fixture feed in `adapters/local/intake.py`, the vertical models in `domain/models.py`, the drafting prompt in `domain/rca.py`, the eval golden set and its two oracles | reseed and rewrite for your feeds |
 
 If your product is another *case lifecycle to closure* service, the hexagon, the three profiles,
-the deterministic-verdict pattern, the eval gate and the Hrz7 review routing transfer directly;
+the deterministic-verdict pattern, the eval gate and the `human-review-console` review routing transfer directly;
 you replace the source normalizers and retune the clock and the checklists.
 
 ## 2. Core-vs-adopter-owned files (so upstream merges stay mechanical)
@@ -80,7 +80,7 @@ make gate
 your resource stem. `--resource` is validated against the same `^[a-z][a-z0-9-]{2,18}$` regex the
 Terraform `name_prefix` variable enforces, so a stem the stack would refuse fails here instead of
 at plan time. Add `--include-docs` to sweep Markdown prose too. The script skips itself, so the
-renamer is never left half-rewritten. The catalog id `Aud3` is left alone unless you pass
+renamer is never left half-rewritten. The catalog id `issue-remediation-capa` is left alone unless you pass
 `--catalog-id`, so a fork stays traceable to the entry it descends from. The script deliberately
 does NOT touch the human decisions below.
 
@@ -98,13 +98,13 @@ does NOT touch the human decisions below.
    in this code) and set `CAPA_IAP_AUDIENCE`. An unset or emptied audience refuses every caller
    rather than verifying without one.
 3. **Your feeds, and the normalizer per feed.** The five sources in `IssueSource` are the ones
-   this build knows (Aud1 findings, Aud2 exceptions, the Rsk1 horizon change-feed, Doc6 findings
+   this build knows (`internal-audit-lifecycle` findings, `continuous-controls-monitoring` exceptions, the `compliance-advisory` horizon change-feed, `complaints-review` findings
    and loss events), each with its own `_norm_*` function mapping a source-shaped record onto the
    shared `IssueEnvelope`. Adding your sixth is three edits and no redesign: a member on
    `IssueSource`, an entry in the `_NORMALIZERS` table, and a path in each intake adapter. The
    enum is a `LenientStrEnum`, so an unrecognised wire value from a future release is read rather
    than crashed on, and `normalize_issue` raises for a source with no normalizer instead of
-   guessing one. (The deferred Rgc10 and Rgc13 feeders are named in the code comments as the
+   guessing one. (The deferred `breach-reportability-assessor` and `whistleblower-triage` feeders are named in the code comments as the
    sources this shape is meant to accommodate; neither is a member yet.) The **drop-not-default
    rule** is the part to keep: a record missing a required field raises `NormalizationError` and
    `collect_issues` drops it, because a defaulted issue is an issue nobody can trace.
@@ -120,7 +120,7 @@ does NOT touch the human decisions below.
    which two issues share a theme. It is tuned for the offline hashing embedder and the fixture
    corpus, so re-tune it against YOUR embedder and your issues, and re-check `theme_purity`
    against a gold labelling you built. A threshold carried over unexamined merges unrelated issues
-   into one systemic theme and reports it to Erm1 as a risk signal.
+   into one systemic theme and reports it to `rcsa-kri-erm` as a risk signal.
 6. **Tenancy.** `ISSUE_TENANT` and `authorize_issue_access` enforce that a caller may only read its
    own issue store, and a cross-tenant read raises 403 rather than returning an empty result or a
    404. Offline the fixture IS the demo bank's store. Decide how your deployment carries the
@@ -149,28 +149,28 @@ rather than tracking remediation themselves. What it integrates rather than rebu
 [`faq/features-faq.md`](faq/features-faq.md) for the full map):
 
 - **The upstream finding sources**, each a member of `IssueSource` and a landing table in
-  `adapters/gcp/intake.py`: **Aud1** internal-audit findings, **Aud2** control-testing exceptions,
-  the **Rsk1** regulatory change horizon, **Doc6** document-review findings, and loss events. This
+  `adapters/gcp/intake.py`: `internal-audit-lifecycle` internal-audit findings, `continuous-controls-monitoring` control-testing exceptions,
+  the `compliance-advisory` regulatory change horizon, `complaints-review` document-review findings, and loss events. This
   repo NORMALIZES what they raise; it never re-derives a finding's severity or re-runs a control
-  test. **Rgc10** and **Rgc13** are named in the code as deferred feeders this shape is meant to
+  test. `breach-reportability-assessor` and `whistleblower-triage` are named in the code as deferred feeders this shape is meant to
   take later; neither is wired, and neither is a member of the source enum yet.
-- **Erm1** enterprise risk: consumes the theme feed at `GET /v1/themes`, one way and read only.
-  There is no write path, because a systemic theme is a signal Erm1 interprets, not a state this
+- `rcsa-kri-erm` enterprise risk: consumes the theme feed at `GET /v1/themes`, one way and read only.
+  There is no write path, because a systemic theme is a signal `rcsa-kri-erm` interprets, not a state this
   repo takes back.
-- **Hrz7** human-review / maker-checker console: every escalation is routed to it over the shared
+- `human-review-console` human-review / maker-checker console: every escalation is routed to it over the shared
   `review-kit` (rule R8), and the approved review reference it returns is the SAME thing
   `plan_transition` demands before an issue may close. You wire your endpoint
   (`HUMAN_REVIEW_URL`); you do not re-implement the console.
-- **Hrz5** observability plus immutable WORM audit: audit events and trace spans go to it through
+- `agent-observability` plus immutable WORM audit: audit events and trace spans go to it through
   `AuditSinkPort` and `ObservabilityTracerPort`.
-- **Hrz4** AI-quality / model-risk gate: owns promotion. `eval/run_eval.py --mode gate` is the
+- `model-quality-gate` AI-quality / model-risk gate: owns promotion. `eval/run_eval.py --mode gate` is the
   client half and refuses to run off the managed profile.
-- **Hrz3** agent registry: this agent publishes its A2A card at
+- `agent-registry`: this agent publishes its A2A card at
   `/.well-known/agent-card.json`; register it rather than inventing a discovery mechanism.
 
-The guardrail gateway (Hrz1) is **not** integrated today, and the enterprise knowledge base
-(Hrz2) is not either: this service reasons over its own issue records rather than over a document
-corpus, and the embeddings port serves clustering rather than retrieval. Hrz1 becomes mandatory
+The guardrail gateway (`agent-guardrail-gateway`) is **not** integrated today, and the enterprise knowledge base
+(`enterprise-knowledge-base`) is not either: this service reasons over its own issue records rather than over a document
+corpus, and the embeddings port serves clustering rather than retrieval. `agent-guardrail-gateway` becomes mandatory
 the moment untrusted free text reaches the drafter, and an issue description from an upstream feed
 is exactly that: see rule R1 in [`../COMPLIANCE.md`](../COMPLIANCE.md).
 
@@ -192,7 +192,7 @@ is exactly that: see rule R1 in [`../COMPLIANCE.md`](../COMPLIANCE.md).
 - [ ] Replaced every synthetic fixture.
 - [ ] Rebuilt the eval golden set and both oracles, recomputing the deadline oracle by hand.
 - [ ] Reviewed the deploy posture (Dockerfile, Terraform, `retention_days`, bind address).
-- [ ] Wired your Hrz7 review endpoint and decided which sibling services you integrate vs stub.
+- [ ] Wired your `human-review-console` review endpoint and decided which sibling services you integrate vs stub.
 - [ ] Read [`model-card.md`](model-card.md) and closed its remaining controls before enabling the
       managed drafter and the managed embedder.
 - [ ] Recorded your baseline upstream tag so you can take future fixes.

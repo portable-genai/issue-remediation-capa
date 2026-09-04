@@ -27,7 +27,8 @@ class TriageResponse(BaseModel):
     decision: str
     summary: str
     requires_human_review: bool
-    #: Where the escalation WENT (rule R8): the Hrz7 review id, or the local queue reference.
+    #: Where the escalation WENT (rule R8): the human-review-console review id, or the local queue
+    #: reference.
     #: Empty only when the result did not escalate. A caller can tell a routed escalation from
     #: a flag that stopped here, which is the whole point of the rule.
     review_ref: str = ""
@@ -86,7 +87,8 @@ class IssueAssessResponse(BaseModel):
     #: comes from the engine, never the model, and it can never satisfy a closure-checklist item.
     rca_note: str = ""
     rca_model_authored: bool = False
-    #: Where the escalation WENT (rule R8): the Hrz7 review id, or the local queue reference.
+    #: Where the escalation WENT (rule R8): the human-review-console review id, or the local queue
+    #: reference.
     review_ref: str = ""
     citations: list[CitationModel] = []
 
@@ -142,7 +144,9 @@ class ThemeModel(BaseModel):
 
 
 class ThemesResponse(BaseModel):
-    """The one-way, read-only theme feed Erm1 consumes. There is no write counterpart by design."""
+    """The one-way, read-only theme feed rcsa-kri-erm consumes. There is no write counterpart by
+    design.
+    """
 
     themes: list[ThemeModel] = []
 

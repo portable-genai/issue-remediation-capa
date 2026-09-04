@@ -57,7 +57,7 @@ def test_themes_feed_returns_clustered_issues(api_client: TestClient) -> None:
 
 
 def test_the_theme_feed_has_no_write_path(api_client: TestClient) -> None:
-    # The Erm1 feed is one-way: a write verb must not be routed to a handler.
+    # The rcsa-kri-erm feed is one-way: a write verb must not be routed to a handler.
     assert api_client.post("/v1/themes", json={}, headers=_AUDITOR).status_code == 405
     assert api_client.delete("/v1/themes", headers=_AUDITOR).status_code == 405
 

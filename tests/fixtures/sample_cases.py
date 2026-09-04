@@ -51,7 +51,8 @@ PII_SUBJECT_CASE = TriageInput(
     text=f"urgent breach, contact {PLANTED_EMAIL} about NRIC {PLANTED_NRIC}",
 )
 
-#: One raw Aud1 intake row carrying the identifiers in the fields the normalizer copies into a
+#: One raw internal-audit-lifecycle intake row carrying the identifiers in the fields the normalizer
+#: copies into a
 #: citation TITLE and SNIPPET. The CAPA assessment path never redacted at all, so this is the
 #: input that proves the kernel boundary covers a second service, not only triage.
 PII_AUD1_RAW: dict[str, object] = {

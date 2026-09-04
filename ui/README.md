@@ -1,6 +1,6 @@
 # ui: the embeddable micro-frontend
 
-A Next.js App Router console for Issue Remediation and CAPA Tracker (Aud3).
+A Next.js App Router console for Issue Remediation and CAPA Tracker (`issue-remediation-capa`).
 It runs standalone for a demo and embeds into a client's existing web application as an iframe,
 with the same security posture either way.
 

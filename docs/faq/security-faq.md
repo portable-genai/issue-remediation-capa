@@ -32,7 +32,7 @@ supplies `state`, `state_since`, `provided_evidence` and `review_ref`, and `can_
 from them. No route performs a transition: `plan_transition`, the function that actually refuses a
 closure without a complete checklist and an approved review reference, is not reachable from the
 API today, and nothing in this repo records an issue as closed. Once you bind a durable store,
-those four fields must come from the store and the review reference must be verified against Hrz7
+those four fields must come from the store and the review reference must be verified against `human-review-console`
 rather than accepted from the body. Until then, treat `can_close` as an assessment of the inputs
 you supplied, not as an authorisation.
 
@@ -87,8 +87,7 @@ authorise a closure.
 The second model surface is the embeddings port, and it carries a different exposure: under `gcp`
 the issue subject and description are SENT to a managed embedding model to produce vectors for
 clustering. Nothing comes back but numbers, and no decision is taken from them beyond which theme
-an issue joins, but the text has left the process. Prompt-injection screening through the Hrz1
-guardrail gateway is **not** wired yet on either path.
+an issue joins, but the text has left the process. Prompt-injection screening through the `agent-guardrail-gateway` is **not** wired yet on either path.
 
 ### How is the audit trail protected?
 
@@ -114,14 +113,14 @@ regular expression cannot tell apart.
 
 - **Login.** This repo authenticates nobody itself: the platform in front of it does, and the UI
   forwards the assertion without parsing or trusting a parsed copy.
-- **Injection defence and output filtering.** Owned by Hrz1; not bound yet.
-- **The review queue.** Owned by Hrz7; this repo produces escalations and routes them.
-- **Raising the issue.** Owned by Aud1, Aud2, Rsk1 and Doc6. This repo normalizes what they raise
+- **Injection defence and output filtering.** Owned by `agent-guardrail-gateway`; not bound yet.
+- **The review queue.** Owned by `human-review-console`; this repo produces escalations and routes them.
+- **Raising the issue.** Owned by `internal-audit-lifecycle`, `continuous-controls-monitoring`, `compliance-advisory` and `complaints-review`. This repo normalizes what they raise
   and never re-derives a finding's severity or re-runs a control test.
 - **Durable storage of the issue register.** Not bound today: offline the fixture feed IS the
   register and lifecycle state comes in on the request. A deployment needs a store behind a port,
   and its access control is part of that work.
 - **Network egress control.** VPC-SC governs access to Google APIs across perimeters, not
   arbitrary internet egress. The private-egress rule that lets this service reach its source
-  feeds and the Hrz7 console and nothing else is an adopter network decision, called out in
+  feeds and the `human-review-console` and nothing else is an adopter network decision, called out in
   `COMPLIANCE.md` P-01.

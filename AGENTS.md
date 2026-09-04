@@ -7,7 +7,7 @@ here. Read it first. This file carries only what is specific to this one.
 
 ## What this is
 
-Issue Remediation and CAPA Tracker (Aud3): Post-finding issue and CAPA lifecycle to closure with SLA, aging and thematic clustering.
+Issue Remediation and CAPA Tracker (`issue-remediation-capa`): Post-finding issue and CAPA lifecycle to closure with SLA, aging and thematic clustering.
 Rendered from `hex-service-template`, so it starts at reference parity rather than converging
 toward it. Package `issue_remediation_capa`, environment prefix
 `CAPA`, region `asia-southeast1`.

@@ -14,7 +14,8 @@ from ...config import Settings
 from ...domain.capa import IssueSource
 
 #: The landing table per source, in the configured dataset. A source with no table is a
-#: deferred feeder (Rgc10 / Rgc13) and has no adapter path, matching the extensible enum.
+#: deferred feeder (breach-reportability-assessor / whistleblower-triage) and has no adapter path,
+#: matching the extensible enum.
 _SOURCE_TABLES: dict[IssueSource, str] = {
     IssueSource.AUD1_FINDING: "aud1_findings",
     IssueSource.AUD2_EXCEPTION: "aud2_exceptions",

@@ -1,24 +1,25 @@
-"""The issue and CAPA lifecycle vertical: the deterministic engine (Aud3's reason to exist).
+"""The issue and CAPA lifecycle vertical: the deterministic engine (issue-remediation-capa's reason
+to exist).
 
-Aud3 OWNS the post-finding lifecycle of audit / exam / incident issues and their corrective and
-preventive actions, to closure. The consequential machinery here is PURE CODE:
+issue-remediation-capa OWNS the post-finding lifecycle of audit / exam / incident issues and their
+corrective and preventive actions, to closure. The consequential machinery here is PURE CODE:
 
-* **Feed-agnostic intake.** Five source families (Aud1 findings, Aud2 exceptions, the Rsk1
-  horizon change-feed, Doc6 findings and loss events) arrive in their own idiosyncratic shapes
-  and are normalized into ONE :class:`IssueEnvelope`. A raw record missing a field the envelope
-  requires raises :class:`NormalizationError`, and the intake service drops it rather than
-  defaulting it. The source enum is extensible: the deferred Rgc10 and Rgc13 feeders are simply
-  members nobody wired an adapter for yet.
-* **The lifecycle state machine** cribs Hrz7's case spine as CONFIGURATION (see
-  :data:`LEGAL_TRANSITIONS`): raised -> rca_drafted -> remediation_in_progress ->
-  closure_submitted -> validated -> closed, with a bounce-back from a rejected closure. An
-  illegal transition raises; nothing walks the graph by accident.
-* **Deadlines and aging** are business-day maths with an explicit ``as_of`` and the holiday set
-  passed in, so the same issue on the same date always yields the same status. SLA breach,
-  approaching deadline and stuck-in-state are computed, never guessed.
-* **Closure that cannot self-serve.** The evidence-adequacy checklist is config-owned per issue
-  type, and the engine refuses the transition to ``closed`` unless the checklist is satisfied AND
-  an approved Hrz7 review reference is present. Nothing auto-closes.
+* **Feed-agnostic intake.** Five source families (internal-audit-lifecycle findings,
+  continuous-controls-monitoring exceptions, the compliance-advisory horizon change-feed,
+  complaints-review findings and loss events) arrive in their own idiosyncratic shapes and are
+  normalized into ONE :class:`IssueEnvelope`. A raw record missing a field the envelope requires
+  raises :class:`NormalizationError`, and the intake service drops it rather than defaulting it. The
+  source enum is extensible: the deferred breach-reportability-assessor and whistleblower-triage
+  feeders are simply members nobody wired an adapter for yet. * **The lifecycle state machine**
+  cribs human-review-console's case spine as CONFIGURATION (see :data:`LEGAL_TRANSITIONS`): raised
+  -> rca_drafted -> remediation_in_progress -> closure_submitted -> validated -> closed, with a
+  bounce-back from a rejected closure. An illegal transition raises; nothing walks the graph by
+  accident. * **Deadlines and aging** are business-day maths with an explicit ``as_of`` and the
+  holiday set passed in, so the same issue on the same date always yields the same status. SLA
+  breach, approaching deadline and stuck-in-state are computed, never guessed. * **Closure that
+  cannot self-serve.** The evidence-adequacy checklist is config-owned per issue type, and the
+  engine refuses the transition to ``closed`` unless the checklist is satisfied AND an approved
+  human-review-console review reference is present. Nothing auto-closes.
 
 A model may DRAFT the root-cause narrative (see :mod:`.rca`); it never produces a date, a band or
 a closure verdict, and it can never satisfy a checklist item. Pure stdlib: no web framework, no
@@ -69,7 +70,8 @@ __all__ = [
 # Taxonomies (a member IS its wire value; lenient so an unknown value is caught, not crashed on)
 # --------------------------------------------------------------------------- #
 class IssueSource(LenientStrEnum):
-    """Where an issue entered Aud3. Extensible on purpose: the deferred Rgc10 / Rgc13 feeders are
+    """Where an issue entered issue-remediation-capa. Extensible on purpose: the deferred
+    breach-reportability-assessor / whistleblower-triage feeders are
     members with no adapter yet, which is the whole accommodation the plan asks for."""
 
     AUD1_FINDING = "aud1_finding"
@@ -89,7 +91,9 @@ class IssueType(LenientStrEnum):
 
 
 class LifecycleState(LenientStrEnum):
-    """The issue / CAPA lifecycle states (the Hrz7 case-spine shape, as configuration)."""
+    """The issue / CAPA lifecycle states (the human-review-console case-spine shape, as
+    configuration).
+    """
 
     RAISED = "raised"
     RCA_DRAFTED = "rca_drafted"
@@ -143,7 +147,7 @@ class NormalizationError(ValueError):
 
 @dataclass(frozen=True, slots=True)
 class IssueEnvelope:
-    """One issue in Aud3's own vocabulary, whatever source it came from."""
+    """One issue in issue-remediation-capa's own vocabulary, whatever source it came from."""
 
     source: IssueSource
     external_id: str
@@ -230,7 +234,11 @@ def _norm_aud1(raw: Mapping[str, object]) -> IssueEnvelope:
         severity=_severity_from_rating(_require(raw, "rating", src), src),
         description=str(raw.get("description") or title),
         opened_on=_parse_date(_require(raw, "raised_on", src), src),
-        citations=(_cit(ext, f"Aud1 finding: {title}", str(raw.get("engagement") or ext)),),
+        citations=(
+            _cit(
+                ext, f"internal-audit-lifecycle finding: {title}", str(raw.get("engagement") or ext)
+            ),
+        ),
     )
 
 
@@ -247,7 +255,9 @@ def _norm_aud2(raw: Mapping[str, object]) -> IssueEnvelope:
         severity=_severity_from_rating(_require(raw, "severity", src), src),
         description=desc,
         opened_on=_parse_date(_require(raw, "detected_on", src), src),
-        citations=(_cit(ext, f"Aud2 exception on {raw.get('control_id')}", desc),),
+        citations=(
+            _cit(ext, f"continuous-controls-monitoring exception on {raw.get('control_id')}", desc),
+        ),
     )
 
 
@@ -264,7 +274,13 @@ def _norm_rsk1(raw: Mapping[str, object]) -> IssueEnvelope:
         severity=_severity_from_rating(_require(raw, "impact", src), src),
         description=summary,
         opened_on=_parse_date(_require(raw, "published_on", src), src),
-        citations=(_cit(ext, f"Rsk1 horizon change: {summary}", str(raw.get("obligation_ref"))),),
+        citations=(
+            _cit(
+                ext,
+                f"compliance-advisory horizon change: {summary}",
+                str(raw.get("obligation_ref")),
+            ),
+        ),
     )
 
 
@@ -281,7 +297,9 @@ def _norm_doc6(raw: Mapping[str, object]) -> IssueEnvelope:
         severity=_severity_from_rating(_require(raw, "severity", src), src),
         description=summary,
         opened_on=_parse_date(_require(raw, "logged_on", src), src),
-        citations=(_cit(ext, f"Doc6 conduct finding: {summary}", str(raw.get("theme"))),),
+        citations=(
+            _cit(ext, f"complaints-review conduct finding: {summary}", str(raw.get("theme"))),
+        ),
     )
 
 
@@ -456,7 +474,7 @@ def aging_finding(
 
 
 # --------------------------------------------------------------------------- #
-# The lifecycle state machine (Hrz7 case spine, as configuration)
+# The lifecycle state machine (human-review-console case spine, as configuration)
 # --------------------------------------------------------------------------- #
 LEGAL_TRANSITIONS: dict[LifecycleState, frozenset[LifecycleState]] = {
     LifecycleState.RAISED: frozenset({LifecycleState.RCA_DRAFTED}),
@@ -536,7 +554,8 @@ def plan_transition(
     """Return the record after a LEGAL transition to ``target``; raise otherwise.
 
     The transition to ``closed`` is the guarded one: it is refused unless the issue type's
-    closure checklist is complete AND ``review_ref`` names an approved Hrz7 review. This is what
+    closure checklist is complete AND ``review_ref`` names an approved human-review-console review.
+    This is what
     makes "never auto-closes" a property of the engine rather than a promise in a doc.
     """
     if target not in LEGAL_TRANSITIONS[record.state]:
@@ -550,7 +569,8 @@ def plan_transition(
             )
         if not resolved_ref:
             raise ClosureBlockedError(
-                "closure requires an approved Hrz7 review reference; none was supplied"
+                "closure requires an approved human-review-console review reference; none was "
+                "supplied"
             )
     return replace(record, state=target, state_since=as_of, review_ref=resolved_ref)
 
@@ -563,7 +583,8 @@ class CapaAssessment:
     """The consequential lifecycle picture for one issue: aging, closure readiness, provenance.
 
     The field set overlaps the shared review envelope (``subject`` / ``severity`` / ``decision``
-    / ``summary`` / ``requires_human_review`` / ``citations``) so a surface can route it to Hrz7
+    / ``summary`` / ``requires_human_review`` / ``citations``) so a surface can route it to
+    human-review-console
     through the shared R8 path without the domain importing a surface type.
     """
 

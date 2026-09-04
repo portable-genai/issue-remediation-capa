@@ -18,7 +18,7 @@ the closure checklist and the clustering arithmetic are stdlib, not managed serv
 | Profile | What it is | Who it is for |
 |---|---|---|
 | `local` | SDK-free offline stack: seeded dev personas, a hash-chained SQLite WORM audit log, a fixture feed covering all five sources, a deterministic hashing embedder, a deterministic stub drafter | dev, test, CI, and the offline demo |
-| `gcp` | the managed stack: IAP identity, Cloud Logging WORM, BigQuery landing tables per source, Vertex AI text embeddings, Gemini drafting, an HTTP client to the Hrz7 console | a managed deployment |
+| `gcp` | the managed stack: IAP identity, Cloud Logging WORM, BigQuery landing tables per source, Vertex AI text embeddings, Gemini drafting, an HTTP client to the `human-review-console` | a managed deployment |
 | `onprem` | fail-fast `NotImplementedError` placeholders | the sovereign exit: a client binds its own in-country implementations here |
 
 `CAPA_PROFILE` selects the family. Unset means the offline adapters bind but nobody chose them,
