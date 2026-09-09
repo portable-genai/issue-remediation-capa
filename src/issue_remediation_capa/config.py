@@ -412,6 +412,13 @@ class Settings:
     profile: str = LOCAL_PROFILE
     region: str = _REGION
     audit_path: str = ":memory:"
+    #: Where the offline profiles keep the DuckDB copy of the shipped intake book.
+    book_path: str = ":memory:"
+    #: The BigQuery dataset holding the five per-source landing tables the managed intake reads.
+    #: There was no such setting: the adapter queried an UNQUALIFIED table name, which BigQuery
+    #: rejects before it looks for the table. Empty makes the managed adapter REFUSE, because an
+    #: empty intake reads as an institution with no open issues.
+    bigquery_dataset: str = ""
     #: External head anchor for the WORM audit chain (practices check C9). Keep it on a
     #: DIFFERENT volume, under different credentials, from ``audit_path``: the hash chain alone
     #: cannot detect a truncated tail, because dropping the newest rows leaves a shorter chain
@@ -518,6 +525,8 @@ class Settings:
             profile_explicit=choice.explicit,
             region=str(data.get("region") or _REGION),
             audit_path=str(data.get("audit_path") or ":memory:"),
+            book_path=str(data.get("book_path") or ":memory:"),
+            bigquery_dataset=str(data.get("bigquery_dataset") or ""),
             audit_anchor_path=str(data.get("audit_anchor_path") or ""),
             review_url=str(data.get("review_url") or ""),
             iap_audience=str(data.get("iap_audience") or ""),
