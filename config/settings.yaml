@@ -23,6 +23,17 @@ tenant: ${CAPA_TENANT:-}
 # deployment points this at a durable path.
 audit_path: ${CAPA_AUDIT_PATH:-:memory:}
 
+# Where the offline profiles keep the DuckDB copy of the shipped intake book. ":memory:" is the
+# ephemeral default the gate runs on: the store self-seeds from the shipped files and is gone at
+# exit. A durable path survives a demo, and the store then leaves what it finds alone.
+book_path: ${CAPA_BOOK_PATH:-:memory:}
+
+# The BigQuery dataset holding the five per-source landing tables. Three-state through the
+# settings file: unset and emptied both arrive as empty, and an empty dataset makes the managed
+# intake REFUSE rather than return an empty tuple, because an empty intake reads as an
+# institution with no open issues.
+bigquery_dataset: ${CAPA_BQ_DATASET:-}
+
 # The external head anchor for the WORM audit chain (practices check C9). The hash chain cannot
 # detect a TRUNCATED TAIL by itself: dropping the newest rows leaves a shorter chain that
 # verifies perfectly. Point this at a file on a DIFFERENT volume, under different credentials,

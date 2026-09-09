@@ -40,6 +40,10 @@ locals {
     # nothing and costs nothing, and it is what keeps "CMEK does not cascade" from becoming a
     # step somebody forgets on the day they add the adapter.
     "aiplatform.googleapis.com",
+    # The five per-source issue landing tables this vertical reads (bigquery.tf). Its CMEK
+    # service-agent binding is in kms.tf. The adapter has always queried these tables; nothing
+    # enabled the API for them until the dataset itself was written down.
+    "bigquery.googleapis.com",
     "storage.googleapis.com",
 
     # Supporting services the above require.

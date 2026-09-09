@@ -1,0 +1,1 @@
+{"event_id": "L-777", "category": "payment failure", "gross_loss": "420000", "narrative": "A duplicated batch caused an outbound payment overpayment.", "occurred_on": "2026-06-08"}

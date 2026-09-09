@@ -1,0 +1,2 @@
+{"exception_id": "E-88", "control_id": "ctrl-residency", "description": "Continuous test found a bucket outside the residency region.", "detected_on": "2026-06-10", "severity": "critical"}
+{"exception_id": "E-91", "control_id": "ctrl-cmek", "description": "A CMEK key was disabled on a production dataset.", "detected_on": "2026-06-12", "severity": "high"}

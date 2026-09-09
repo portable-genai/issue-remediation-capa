@@ -185,8 +185,12 @@ CANONICAL_CALLS: dict[str, PortCase] = {
     "intake": PortCase(
         invoke=_intake_invoke,
         answered=_intake_answered,
-        # The managed intake lazily imports the BigQuery SDK, absent offline and in CI.
-        managed_refusal=(ImportError,),
+        # The CONFIGURATION check runs before the lazy BigQuery import, so the refusal names the
+        # missing variable rather than a missing package. That order is deliberate: an operator
+        # reading an ImportError goes looking for a wheel. There was nothing to be missing
+        # before, because the adapter named its tables unqualified and read no dataset setting
+        # at all, which is a query BigQuery rejects outright.
+        managed_refusal=(RuntimeError,),
         detail="fetch raw issue records for a source",
     ),
     "embeddings": PortCase(

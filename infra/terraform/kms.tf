@@ -86,3 +86,12 @@ resource "google_kms_crypto_key_iam_member" "storage" {
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.this.number}@gs-project-accounts.iam.gserviceaccount.com"
 }
+
+# BigQuery encrypts the issue landing dataset under this key. Without this binding the dataset is
+# created successfully and encrypts under Google-managed keys instead, which is indistinguishable
+# in the console from the CMEK case: the failure mode is a silent downgrade, not an error.
+resource "google_kms_crypto_key_iam_member" "bigquery" {
+  crypto_key_id = google_kms_crypto_key.cmek.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.this.number}@bigquery-encryption.iam.gserviceaccount.com"
+}

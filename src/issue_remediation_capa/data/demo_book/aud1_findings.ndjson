@@ -1,0 +1,3 @@
+{"finding_id": "F-2026-011", "description": "The archive storage tier had no residency evidence for the quarter.", "engagement": "Cloud controls audit", "raised_on": "2026-06-01", "rating": "high", "title": "Residency control not evidenced for archive tier"}
+{"finding_id": "F-2026-012", "description": "Key rotation for the ledger store exceeded the policy interval.", "engagement": "Cloud controls audit", "raised_on": "2026-06-03", "rating": "high", "title": "Encryption key rotation overdue on ledger store"}
+{"finding_id": "F-2026-013", "description": null, "engagement": "Cloud controls audit", "raised_on": "2026-06-04", "rating": "showstopper", "title": "Log retention shorter than mandated"}
