@@ -212,3 +212,69 @@ def test_a_deferred_source_with_no_landing_table_answers_empty(
     if not deferred:
         pytest.skip("every source is wired in this wave")
     assert intake.fetch(deferred[0]) == ()
+
+
+# --------------------------------------------------------------------------- #
+# The key the dataset stamps onto every table it creates
+# --------------------------------------------------------------------------- #
+# Watched failing first, on a copy of bigquery.tf with one table's block deleted: the per-table
+# assertion names the table, and the count assertion catches a table added later with no block
+# at all.
+_TABLE_BLOCK = re.compile(r'resource\s+"google_bigquery_table"\s+"(\w+)"\s*\{(.*?)\n\}', re.DOTALL)
+_TABLE_KEY = re.compile(r"\n\s*encryption_configuration\s*\{[^}]*?kms_key_name\s*=\s*([^\s#]+)")
+_ANY_TABLE_BLOCK = re.compile(r"\n\s*encryption_configuration\s*\{")
+
+
+def _dataset_default_key() -> str:
+    """The key the dataset's ``default_encryption_configuration`` names."""
+    block = re.search(
+        r"default_encryption_configuration\s*\{(.*?)\n  \}",
+        _TF.read_text(encoding="utf-8"),
+        flags=re.DOTALL,
+    )
+    assert block is not None, "the dataset declares no default_encryption_configuration"
+    key = re.search(r"kms_key_name\s*=\s*([^\s#]+)", block.group(1))
+    assert key is not None, "the dataset's default_encryption_configuration names no key"
+    return key.group(1)
+
+
+def test_every_table_declares_the_key_the_dataset_would_stamp_on_it() -> None:
+    """An inherited CMEK key is a REPLACEMENT waiting to happen, and a replaced table is empty.
+
+    The dataset's ``default_encryption_configuration`` makes BigQuery stamp that key onto every
+    table it creates in the dataset, so the live table carries an ``encryption_configuration``
+    whether or not the Terraform declares one. Terraform then reads the undeclared block as a
+    REMOVAL, and removing an encryption configuration FORCES REPLACEMENT: the table is destroyed
+    and recreated, and a recreated table holds no rows. Proved by execution against a sibling
+    deployment on 2026-09-12, where every loaded table planned as ``must be replaced`` with
+    ``encryption_configuration { # forces replacement }`` as the cause.
+
+    CMEK cascades in BigQuery's model and not in Terraform's, which is why the key is named
+    twice, and why nothing but a check like this notices when it is named once.
+    """
+    text = _TF.read_text(encoding="utf-8")
+    expected = _dataset_default_key()
+    blocks = _TABLE_BLOCK.findall(text)
+    assert blocks, "no google_bigquery_table blocks found; the regex or the file moved"
+
+    for name, block in blocks:
+        declared = _TABLE_KEY.search(block)
+        assert declared is not None, (
+            f"google_bigquery_table.{name} declares no encryption_configuration. The dataset "
+            "stamps its key onto the table anyway, so the next plan reads the server-set block "
+            "as a removal and REPLACES the table, which destroys every row it holds."
+        )
+        assert declared.group(1) == expected, (
+            f"google_bigquery_table.{name} names {declared.group(1)} where the dataset stamps "
+            f"{expected}. A table keyed differently from the dataset default is still a "
+            "replacement at the next plan."
+        )
+
+    # The count is the half that catches a table added LATER with no block at all: iterating the
+    # tables found cannot fail over a table nobody declared a key for if nobody looks at how many
+    # keys were declared.
+    assert len(_ANY_TABLE_BLOCK.findall(text)) == len(blocks), (
+        f"{len(blocks)} google_bigquery_table resources and "
+        f"{len(_ANY_TABLE_BLOCK.findall(text))} table-level encryption_configuration blocks; "
+        "every table needs exactly one, naming the dataset's key."
+    )

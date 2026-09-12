@@ -56,6 +56,17 @@ resource "google_bigquery_table" "aud1_findings" {
   project             = var.project_id
   deletion_protection = true
 
+  # The same key the dataset names, declared again here on purpose. The dataset's
+  # default_encryption_configuration makes BigQuery stamp that key onto every table it creates in
+  # the dataset, so the live table carries an encryption_configuration whether or not this
+  # resource declares one. Leaving it undeclared makes the next plan read the server-set block as
+  # a REMOVAL, and removing an encryption configuration FORCES REPLACEMENT: the table is destroyed
+  # and recreated, and a recreated table holds no rows. CMEK does not cascade in Terraform's model
+  # even though it does in BigQuery's, which is why the key is named twice.
+  encryption_configuration {
+    kms_key_name = google_kms_crypto_key.cmek.id
+  }
+
   schema = jsonencode([
     { name = "finding_id", type = "STRING", mode = "REQUIRED" },
     { name = "description", type = "STRING", mode = "NULLABLE" },
@@ -73,6 +84,17 @@ resource "google_bigquery_table" "aud2_exceptions" {
   project             = var.project_id
   deletion_protection = true
 
+  # The same key the dataset names, declared again here on purpose. The dataset's
+  # default_encryption_configuration makes BigQuery stamp that key onto every table it creates in
+  # the dataset, so the live table carries an encryption_configuration whether or not this
+  # resource declares one. Leaving it undeclared makes the next plan read the server-set block as
+  # a REMOVAL, and removing an encryption configuration FORCES REPLACEMENT: the table is destroyed
+  # and recreated, and a recreated table holds no rows. CMEK does not cascade in Terraform's model
+  # even though it does in BigQuery's, which is why the key is named twice.
+  encryption_configuration {
+    kms_key_name = google_kms_crypto_key.cmek.id
+  }
+
   schema = jsonencode([
     { name = "exception_id", type = "STRING", mode = "REQUIRED" },
     { name = "control_id", type = "STRING", mode = "REQUIRED" },
@@ -88,6 +110,17 @@ resource "google_bigquery_table" "rsk1_horizon_changes" {
   table_id            = "rsk1_horizon_changes"
   project             = var.project_id
   deletion_protection = true
+
+  # The same key the dataset names, declared again here on purpose. The dataset's
+  # default_encryption_configuration makes BigQuery stamp that key onto every table it creates in
+  # the dataset, so the live table carries an encryption_configuration whether or not this
+  # resource declares one. Leaving it undeclared makes the next plan read the server-set block as
+  # a REMOVAL, and removing an encryption configuration FORCES REPLACEMENT: the table is destroyed
+  # and recreated, and a recreated table holds no rows. CMEK does not cascade in Terraform's model
+  # even though it does in BigQuery's, which is why the key is named twice.
+  encryption_configuration {
+    kms_key_name = google_kms_crypto_key.cmek.id
+  }
 
   schema = jsonencode([
     { name = "change_id", type = "STRING", mode = "REQUIRED" },
@@ -105,6 +138,17 @@ resource "google_bigquery_table" "doc6_findings" {
   project             = var.project_id
   deletion_protection = true
 
+  # The same key the dataset names, declared again here on purpose. The dataset's
+  # default_encryption_configuration makes BigQuery stamp that key onto every table it creates in
+  # the dataset, so the live table carries an encryption_configuration whether or not this
+  # resource declares one. Leaving it undeclared makes the next plan read the server-set block as
+  # a REMOVAL, and removing an encryption configuration FORCES REPLACEMENT: the table is destroyed
+  # and recreated, and a recreated table holds no rows. CMEK does not cascade in Terraform's model
+  # even though it does in BigQuery's, which is why the key is named twice.
+  encryption_configuration {
+    kms_key_name = google_kms_crypto_key.cmek.id
+  }
+
   schema = jsonencode([
     { name = "complaint_id", type = "STRING", mode = "REQUIRED" },
     { name = "logged_on", type = "STRING", mode = "REQUIRED" },
@@ -120,6 +164,17 @@ resource "google_bigquery_table" "loss_events" {
   table_id            = "loss_events"
   project             = var.project_id
   deletion_protection = true
+
+  # The same key the dataset names, declared again here on purpose. The dataset's
+  # default_encryption_configuration makes BigQuery stamp that key onto every table it creates in
+  # the dataset, so the live table carries an encryption_configuration whether or not this
+  # resource declares one. Leaving it undeclared makes the next plan read the server-set block as
+  # a REMOVAL, and removing an encryption configuration FORCES REPLACEMENT: the table is destroyed
+  # and recreated, and a recreated table holds no rows. CMEK does not cascade in Terraform's model
+  # even though it does in BigQuery's, which is why the key is named twice.
+  encryption_configuration {
+    kms_key_name = google_kms_crypto_key.cmek.id
+  }
 
   schema = jsonencode([
     { name = "event_id", type = "STRING", mode = "REQUIRED" },
@@ -143,6 +198,17 @@ resource "google_bigquery_table" "book_manifest" {
   table_id            = "book_manifest"
   project             = var.project_id
   deletion_protection = true
+
+  # The same key the dataset names, declared again here on purpose. The dataset's
+  # default_encryption_configuration makes BigQuery stamp that key onto every table it creates in
+  # the dataset, so the live table carries an encryption_configuration whether or not this
+  # resource declares one. Leaving it undeclared makes the next plan read the server-set block as
+  # a REMOVAL, and removing an encryption configuration FORCES REPLACEMENT: the table is destroyed
+  # and recreated, and a recreated table holds no rows. CMEK does not cascade in Terraform's model
+  # even though it does in BigQuery's, which is why the key is named twice.
+  encryption_configuration {
+    kms_key_name = google_kms_crypto_key.cmek.id
+  }
 
   schema = jsonencode([
     { name = "book_version", type = "STRING", mode = "REQUIRED" },
