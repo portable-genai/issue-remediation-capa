@@ -130,11 +130,22 @@ def load(project: str, dataset: str, rows: dict[str, list[dict[str, Any]]], loca
             "or one holding a previous demo book."
         )
     for table in _TABLES:
+        table_ref = bigquery.TableReference.from_string(f"{dataset_ref}.{table}")
+        # Load into the schema the TABLE already has, which is the schema Terraform declared.
+        # WRITE_TRUNCATE with no schema autodetects one from the rows and REPLACES the table's,
+        # which leaves the live table carrying its columns in the order the JSON happened to
+        # serialise them with every mode relaxed to NULLABLE. Nothing fails when that happens:
+        # the rows land and the demo reads them. The cost arrives at the next `terraform plan`,
+        # which reports every loaded table as `must be replaced` -- because BigQuery cannot
+        # narrow a column's mode in place -- and a replaced table holds no rows. Passing the
+        # schema makes a row that does not fit the declared columns fail its own load instead,
+        # which is where a data defect belongs.
         job = client.load_table_from_json(
             rows[table],
-            f"{dataset_ref}.{table}",
+            table_ref,
             job_config=bigquery.LoadJobConfig(
-                write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE
+                schema=client.get_table(table_ref).schema,
+                write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
             ),
         )
         job.result()
