@@ -216,19 +216,24 @@ def test_a_deferred_source_with_no_landing_table_answers_empty(
 
 # --------------------------------------------------------------------------- #
 # The key the dataset stamps onto every table it creates
+#
+# Since CMEK became optional the blocks are `dynamic`, present only when cmek_enabled is true;
+# the regexes accept both spellings so the agreement is still checked on the declared key.
 # --------------------------------------------------------------------------- #
 # Watched failing first, on a copy of bigquery.tf with one table's block deleted: the per-table
 # assertion names the table, and the count assertion catches a table added later with no block
 # at all.
 _TABLE_BLOCK = re.compile(r'resource\s+"google_bigquery_table"\s+"(\w+)"\s*\{(.*?)\n\}', re.DOTALL)
-_TABLE_KEY = re.compile(r"\n\s*encryption_configuration\s*\{[^}]*?kms_key_name\s*=\s*([^\s#]+)")
-_ANY_TABLE_BLOCK = re.compile(r"\n\s*encryption_configuration\s*\{")
+_TABLE_KEY = re.compile(
+    r"\n\s*(?:dynamic\s+\")?encryption_configuration\"?\s*\{[^}]*?kms_key_name\s*=\s*([^\s#]+)"
+)
+_ANY_TABLE_BLOCK = re.compile(r"\n\s*(?:dynamic\s+\")?encryption_configuration\"?\s*\{")
 
 
 def _dataset_default_key() -> str:
     """The key the dataset's ``default_encryption_configuration`` names."""
     block = re.search(
-        r"default_encryption_configuration\s*\{(.*?)\n  \}",
+        r"(?:dynamic\s+\")?default_encryption_configuration\"?\s*\{(.*?)\n  \}",
         _TF.read_text(encoding="utf-8"),
         flags=re.DOTALL,
     )

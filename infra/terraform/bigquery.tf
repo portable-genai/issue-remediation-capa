@@ -37,8 +37,11 @@ resource "google_bigquery_dataset" "issue_intake" {
   location    = local.region # P-03
   description = "Per-source issue landing tables for issue-remediation-capa (internal, CMEK)."
 
-  default_encryption_configuration {
-    kms_key_name = google_kms_crypto_key.cmek.id # CMEK does not cascade (P-09)
+  dynamic "default_encryption_configuration" {
+    for_each = var.cmek_enabled ? [1] : []
+    content {
+      kms_key_name = one(google_kms_crypto_key.cmek[*].id) # CMEK does not cascade (P-09)
+    }
   }
 
   delete_contents_on_destroy = false
@@ -63,8 +66,11 @@ resource "google_bigquery_table" "aud1_findings" {
   # a REMOVAL, and removing an encryption configuration FORCES REPLACEMENT: the table is destroyed
   # and recreated, and a recreated table holds no rows. CMEK does not cascade in Terraform's model
   # even though it does in BigQuery's, which is why the key is named twice.
-  encryption_configuration {
-    kms_key_name = google_kms_crypto_key.cmek.id
+  dynamic "encryption_configuration" {
+    for_each = var.cmek_enabled ? [1] : []
+    content {
+      kms_key_name = one(google_kms_crypto_key.cmek[*].id)
+    }
   }
 
   schema = jsonencode([
@@ -91,8 +97,11 @@ resource "google_bigquery_table" "aud2_exceptions" {
   # a REMOVAL, and removing an encryption configuration FORCES REPLACEMENT: the table is destroyed
   # and recreated, and a recreated table holds no rows. CMEK does not cascade in Terraform's model
   # even though it does in BigQuery's, which is why the key is named twice.
-  encryption_configuration {
-    kms_key_name = google_kms_crypto_key.cmek.id
+  dynamic "encryption_configuration" {
+    for_each = var.cmek_enabled ? [1] : []
+    content {
+      kms_key_name = one(google_kms_crypto_key.cmek[*].id)
+    }
   }
 
   schema = jsonencode([
@@ -118,8 +127,11 @@ resource "google_bigquery_table" "rsk1_horizon_changes" {
   # a REMOVAL, and removing an encryption configuration FORCES REPLACEMENT: the table is destroyed
   # and recreated, and a recreated table holds no rows. CMEK does not cascade in Terraform's model
   # even though it does in BigQuery's, which is why the key is named twice.
-  encryption_configuration {
-    kms_key_name = google_kms_crypto_key.cmek.id
+  dynamic "encryption_configuration" {
+    for_each = var.cmek_enabled ? [1] : []
+    content {
+      kms_key_name = one(google_kms_crypto_key.cmek[*].id)
+    }
   }
 
   schema = jsonencode([
@@ -145,8 +157,11 @@ resource "google_bigquery_table" "doc6_findings" {
   # a REMOVAL, and removing an encryption configuration FORCES REPLACEMENT: the table is destroyed
   # and recreated, and a recreated table holds no rows. CMEK does not cascade in Terraform's model
   # even though it does in BigQuery's, which is why the key is named twice.
-  encryption_configuration {
-    kms_key_name = google_kms_crypto_key.cmek.id
+  dynamic "encryption_configuration" {
+    for_each = var.cmek_enabled ? [1] : []
+    content {
+      kms_key_name = one(google_kms_crypto_key.cmek[*].id)
+    }
   }
 
   schema = jsonencode([
@@ -172,8 +187,11 @@ resource "google_bigquery_table" "loss_events" {
   # a REMOVAL, and removing an encryption configuration FORCES REPLACEMENT: the table is destroyed
   # and recreated, and a recreated table holds no rows. CMEK does not cascade in Terraform's model
   # even though it does in BigQuery's, which is why the key is named twice.
-  encryption_configuration {
-    kms_key_name = google_kms_crypto_key.cmek.id
+  dynamic "encryption_configuration" {
+    for_each = var.cmek_enabled ? [1] : []
+    content {
+      kms_key_name = one(google_kms_crypto_key.cmek[*].id)
+    }
   }
 
   schema = jsonencode([
@@ -206,8 +224,11 @@ resource "google_bigquery_table" "book_manifest" {
   # a REMOVAL, and removing an encryption configuration FORCES REPLACEMENT: the table is destroyed
   # and recreated, and a recreated table holds no rows. CMEK does not cascade in Terraform's model
   # even though it does in BigQuery's, which is why the key is named twice.
-  encryption_configuration {
-    kms_key_name = google_kms_crypto_key.cmek.id
+  dynamic "encryption_configuration" {
+    for_each = var.cmek_enabled ? [1] : []
+    content {
+      kms_key_name = one(google_kms_crypto_key.cmek[*].id)
+    }
   }
 
   schema = jsonencode([
