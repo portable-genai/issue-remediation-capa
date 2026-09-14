@@ -26,6 +26,7 @@ run "every_table_declares_the_datasets_key" {
   command = plan
 
   variables {
+    cmek_enabled  = true
     project_id    = "fictional-agent-project"
     enable_vpc_sc = false
   }
