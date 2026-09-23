@@ -22,6 +22,13 @@
 
 mock_provider "google" {}
 
+
+# worm_locked has NO DEFAULT (variables.tf), so every plan here has to state it. The key
+# assertions below do not depend on it, so the production form is stated once for the file.
+variables {
+  worm_locked = true
+}
+
 run "every_table_declares_the_datasets_key" {
   command = plan
 
