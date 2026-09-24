@@ -43,8 +43,8 @@ Four things, and two of them are code here:
    never assumes one, which is correct but means somebody has to supply it, per jurisdiction, and
    keep it current. A wrong calendar moves every due date.
 4. **The review console.** An `human-review-console` deployment reachable at `HUMAN_REVIEW_URL`. The managed
-   router REFUSES to swallow an escalation when this is empty, so a fork cannot ship rule R8
-   unwired and green, and the approved reference it returns is what a closure requires.
+   profile REFUSES TO BOOT with routing on and this empty, so a fork cannot ship rule R8 unwired and
+   green (`CAPA_REVIEW_ROUTING=off` is the stated way to run without a console), and the approved reference it returns is what a closure requires.
 
 ### How do I add a new source feed?
 

@@ -68,6 +68,7 @@ from hex_service_kit.web import (
     make_require_service_caller,
 )
 
+from ..adapters.controls import RecordingReviewRouter
 from ..config import (
     LOCAL_PROFILE,
     Container,
@@ -312,12 +313,13 @@ def triage(
         TriageInput(subject=request.subject, text=request.text),
         actor=principal.actor,
     )
-    review_ref = ""
-    if result.requires_human_review:
-        review_ref = container.review_router.route(
-            result, maker=principal.actor, tenant=principal.tenant
-        )
-    return TriageResponse.from_domain(result, review_ref=review_ref)
+    # The hand-off never fails an already-scored, already-audited triage; the response says
+    # what happened to it instead (the fleet's runtime-control contract).
+    routing = RecordingReviewRouter(container.review_router)
+    review_ref = routing.route(result, maker=principal.actor, tenant=principal.tenant)
+    return TriageResponse.from_domain(
+        result, review_ref=review_ref, review_routing=routing.outcome.value
+    )
 
 
 def _capa_to_review(assessment: CapaAssessment) -> TriageResult:
@@ -392,12 +394,13 @@ def assess_issue(
     )
     rca = RcaService(container.generation).draft(assessment)
 
-    review_ref = ""
-    if assessment.requires_human_review:
-        review_ref = container.review_router.route(
-            _capa_to_review(assessment), maker=principal.actor, tenant=principal.tenant
-        )
-    return IssueAssessResponse.from_domain(assessment, rca=rca, review_ref=review_ref)
+    routing = RecordingReviewRouter(container.review_router)
+    review_ref = routing.route(
+        _capa_to_review(assessment), maker=principal.actor, tenant=principal.tenant
+    )
+    return IssueAssessResponse.from_domain(
+        assessment, rca=rca, review_ref=review_ref, review_routing=routing.outcome.value
+    )
 
 
 @app.get("/v1/themes", response_model=ThemesResponse, tags=["artifacts"])
