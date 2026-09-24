@@ -42,8 +42,10 @@ intention: the API, the CLI and the agent tools all route in the same call that 
 result, and `tests/unit/test_review_routing.py` asserts the routing rather than the flag. A
 submitted closure always escalates, because a closure validated by the pipeline that assessed it
 is not validated at all; so do an SLA breach, an approaching deadline and a stuck issue. Under the
-managed profile the router REFUSES when no console is configured, so a deployment cannot swallow
-an escalation silently.
+managed profile the service REFUSES TO BOOT with routing on and no console configured, and every
+response says what happened to its hand-off (`review_routing`: routed, failed, off or not_required),
+so a deployment cannot swallow an escalation silently. Switching routing off
+(`CAPA_REVIEW_ROUTING=off`) is a stated posture the service logs at startup.
 
 ### Where does the data live, and is residency enforced or just documented?
 
