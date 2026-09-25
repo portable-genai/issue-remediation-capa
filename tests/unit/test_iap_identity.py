@@ -401,47 +401,51 @@ _REBOUND_SETTINGS = "\n".join(
         "review_url: ${HUMAN_REVIEW_URL:-}",
         "adapters:",
         "  audit:",
-        *[f"    {p}: {_PKG}.adapters.local.audit:LocalAuditAdapter" for p in ("local", "gcp")],
+        *[
+            f"    {p}: {_PKG}.adapters.local.audit:LocalAuditAdapter"
+            for p in ("local", "live", "gcp")
+        ],
         f"    onprem: {_PKG}.adapters.onprem.audit:OnPremAuditAdapter",
         "  identity:",
         f"    local: {_PKG}.adapters.local.identity:LocalIdentityAdapter",
+        f"    live: {_PKG}.adapters.local.identity:LocalIdentityAdapter",
         f"    gcp: {_PKG}.adapters.gcp.identity:IapIdentityAdapter",
         f"    onprem: {_PKG}.adapters.onprem.identity:OnPremIdentityAdapter",
         "  review_router:",
         *[
             f"    {p}: {_PKG}.adapters.local.review_router:LocalReviewRouter"
-            for p in ("local", "gcp")
+            for p in ("local", "live", "gcp")
         ],
         f"    onprem: {_PKG}.adapters.onprem.review_router:OnPremReviewRouter",
         # Every port must bind every profile or `_bindings_from` refuses the whole file.
         "  tracer:",
         *[
             f"    {p}: {_PKG}.adapters.local.tracer:LocalNoopTracerAdapter"
-            for p in ("local", "gcp")
+            for p in ("local", "live", "gcp")
         ],
         f"    onprem: {_PKG}.adapters.onprem.tracer:OnPremTracerAdapter",
         "  evaluation:",
         *[
             f"    {p}: {_PKG}.adapters.local.evaluation:LocalOfflineEvalAdapter"
-            for p in ("local", "gcp")
+            for p in ("local", "live", "gcp")
         ],
         f"    onprem: {_PKG}.adapters.onprem.evaluation:OnPremEvalAdapter",
         "  generation:",
         *[
             f"    {p}: {_PKG}.adapters.local.generation:LocalGenerationAdapter"
-            for p in ("local", "gcp")
+            for p in ("local", "live", "gcp")
         ],
         f"    onprem: {_PKG}.adapters.onprem.generation:OnPremGenerationAdapter",
         "  intake:",
         *[
             f"    {p}: {_PKG}.adapters.local.intake:LocalFixtureIntakeAdapter"
-            for p in ("local", "gcp")
+            for p in ("local", "live", "gcp")
         ],
         f"    onprem: {_PKG}.adapters.onprem.intake:OnPremIntakeAdapter",
         "  embeddings:",
         *[
             f"    {p}: {_PKG}.adapters.local.embeddings:LocalHashingEmbeddingAdapter"
-            for p in ("local", "gcp")
+            for p in ("local", "live", "gcp")
         ],
         f"    onprem: {_PKG}.adapters.onprem.embeddings:OnPremEmbeddingAdapter",
     ]

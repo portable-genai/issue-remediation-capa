@@ -3,7 +3,8 @@
 These personas are an UNAUTHENTICATED grant: the caller names one in a request header and gets
 its groups and tenant. That is fine for an offline demo and is not fine for a deployment whose
 profile variable simply went missing, so this adapter refuses to construct unless the local
-profile was chosen DELIBERATELY. The profile must actually be ``local`` AND (when the settings
+profile was chosen DELIBERATELY. The profile must actually be a laptop profile (``local``, or
+``live``, which is ``local`` with a real local model behind the model port) AND (when the settings
 came from the environment) ``CAPA_PROFILE`` must have been set rather
 than inherited from the offline default.
 
@@ -22,7 +23,7 @@ from hex_service_kit.identity import (
     RequestContext,
 )
 
-from ...config import LOCAL_PROFILE, Settings
+from ...config import LAPTOP_PROFILES, Settings
 from ...ports.identity import CLIENT_ASSERTED, EndUserAuthUnavailableError
 
 
@@ -51,9 +52,9 @@ class LocalIdentityAdapter:
     end_user_auth = CLIENT_ASSERTED
 
     def __init__(self, settings: Settings) -> None:
-        if settings.profile != LOCAL_PROFILE:
+        if settings.profile not in LAPTOP_PROFILES:
             raise LocalPersonaProfileError(
-                "seeded dev personas are local-profile only; "
+                "seeded dev personas are laptop-profile (local, live) only; "
                 f"refusing to serve them under profile {settings.profile!r}"
             )
         if not settings.profile_explicit:
