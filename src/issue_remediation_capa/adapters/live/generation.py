@@ -36,10 +36,6 @@ from ...ports.generation import GenerationRequest, GenerationResponse
 
 _log = logging.getLogger(__name__)
 
-#: The sampling temperature the managed adapter narrates at. The request carries none, so the
-#: live lane samples exactly as the managed lane does rather than choosing a value of its own.
-_TEMPERATURE = 0.2
-
 
 def response_schema(request: GenerationRequest) -> dict[str, Any]:
     """The JSON Schema the request's ``response_keys`` describe: each key a non-empty string."""
@@ -66,7 +62,7 @@ class LocalModelGenerationAdapter:
             completion = self._client.complete_json(
                 messages,
                 schema=response_schema(request),
-                temperature=_TEMPERATURE,
+                temperature=request.temperature,  # None: free, so not sent
                 max_tokens=request.max_output_tokens,
             )
         except (LocalModelUnavailable, LocalModelOutputError):

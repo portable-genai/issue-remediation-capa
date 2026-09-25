@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import json
 
+from hex_service_kit import provenance
+
 from ...config import Settings
 from ...ports.generation import GenerationRequest, GenerationResponse
 
@@ -18,10 +20,15 @@ from ...ports.generation import GenerationRequest, GenerationResponse
 class LocalGenerationAdapter:
     """Restate the request's engine facts as a deterministic JSON note (no model, no network)."""
 
+    #: What this narrator answers as, for the console's model pill: the name ``generator_model``
+    #: reports under ``local``, so the pill before and after an answer agree.
+    MODEL = "deterministic-offline-stub"
+
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
 
     def generate(self, request: GenerationRequest) -> GenerationResponse:
+        provenance.note_model(self.MODEL)
         values = dict(request.facts)
         note = (
             f"Issue is {values.get('severity', 'low')} severity in state "
@@ -29,4 +36,4 @@ class LocalGenerationAdapter:
             f"{values.get('overdue_business_days', '0')} business day(s) overdue and "
             f"{values.get('missing_evidence', '0')} closure-evidence item(s) outstanding."
         )
-        return GenerationResponse(text=json.dumps({"note": note}), model="local-deterministic")
+        return GenerationResponse(text=json.dumps({"note": note}), model=self.MODEL)
