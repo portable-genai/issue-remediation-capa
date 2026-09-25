@@ -99,7 +99,7 @@ def test_the_request_is_mapped_onto_the_chat_call() -> None:
     assert "JSON Schema" in sent["messages"][0]["content"], "the schema rides in the prompt"
     assert sent["messages"][1]["content"] == _request().prompt
     assert sent["max_tokens"] == _request().max_output_tokens
-    assert sent["temperature"] == 0.2, "the managed adapter's sampling, not a new choice"
+    assert "temperature" not in sent, "narration is drafting: free sampling sends no temperature"
 
 
 def test_usage_is_reported_only_when_the_server_reports_it() -> None:
@@ -156,6 +156,6 @@ def test_live_takes_the_laptop_posture() -> None:
     LocalIdentityAdapter(local_settings(profile=LIVE_PROFILE))
 
 
-def test_the_banner_names_the_local_model(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_the_model_pill_names_the_local_model(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("LOCAL_MODEL", "some-org/some-local-model")
     assert local_settings(profile=LIVE_PROFILE).generator_model == "some-org/some-local-model"

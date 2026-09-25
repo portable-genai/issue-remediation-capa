@@ -17,6 +17,10 @@ Developer API or Vertex (``GOOGLE_GENAI_USE_VERTEXAI``) without a code change he
 
 from __future__ import annotations
 
+from typing import Any
+
+from hex_service_kit import provenance
+
 from ...config import Settings
 from ...ports.generation import GenerationRequest, GenerationResponse
 
@@ -39,14 +43,18 @@ class CloudGenerationAdapter:
         from google.genai import types
 
         client = genai.Client()
+        options: dict[str, Any] = {
+            "system_instruction": request.system,
+            "response_mime_type": "application/json",
+            "max_output_tokens": request.max_output_tokens,
+        }
+        if request.temperature is not None:
+            # Free sampling is an ABSENT temperature, never 1.0: only a pinned call sends one.
+            options["temperature"] = request.temperature
         completion = client.models.generate_content(
             model=self._MODEL,
             contents=request.prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=request.system,
-                response_mime_type="application/json",
-                max_output_tokens=request.max_output_tokens,
-                temperature=0.2,
-            ),
+            config=types.GenerateContentConfig(**options),
         )
+        provenance.note_model(self._MODEL)
         return GenerationResponse(text=completion.text or "", model=self._MODEL)

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { ProvenanceBanner } from "./ProvenanceBanner";
+import { ModelPills } from "./ModelPills";
 import "./globals.css";
 
 // The title is intentionally generic. The service's own identity comes from its agent card at
@@ -19,10 +19,14 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  // The pills are mounted in the LAYOUT, not in a page. "At the top of every page" is a
+  // property of the console, and a page that forgot to include them would be the one page a
+  // screenshot came from. Embedded routes get them too: an embed is exactly where a viewer
+  // has least context about which model answered.
   return (
     <html lang="en">
       <body>
-        <ProvenanceBanner />
+        <ModelPills />
         {children}
       </body>
     </html>
