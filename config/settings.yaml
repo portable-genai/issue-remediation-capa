@@ -58,7 +58,9 @@ iap_audience: ${CAPA_IAP_AUDIENCE:-}
 review_url: ${HUMAN_REVIEW_URL:-}
 
 # The per-port adapter map: the ONLY place a binding lives, so switching the whole stack is a
-# configuration change rather than a code edit. Every port must bind every profile; the loader
+# configuration change rather than a code edit. `live` binds what `local` binds except the model
+# port, which calls the local open-weight model server (LOCAL_MODEL_URL, LOCAL_MODEL) through the
+# shared hex_service_kit.localmodel client. Every port must bind every profile; the loader
 # refuses a partial block and `tests/test_settings_file.py` fails the build if this drifts from
 # `config.DEFAULT_BINDINGS`.
 project_id: ${GOOGLE_CLOUD_PROJECT:-}
@@ -66,14 +68,17 @@ project_id: ${GOOGLE_CLOUD_PROJECT:-}
 adapters:
   audit:
     local: issue_remediation_capa.adapters.local.audit:LocalAuditAdapter
+    live: issue_remediation_capa.adapters.local.audit:LocalAuditAdapter
     gcp: issue_remediation_capa.adapters.gcp.audit:CloudAuditAdapter
     onprem: issue_remediation_capa.adapters.onprem.audit:OnPremAuditAdapter
   identity:
     local: issue_remediation_capa.adapters.local.identity:LocalIdentityAdapter
+    live: issue_remediation_capa.adapters.local.identity:LocalIdentityAdapter
     gcp: issue_remediation_capa.adapters.gcp.identity:IapIdentityAdapter
     onprem: issue_remediation_capa.adapters.onprem.identity:OnPremIdentityAdapter
   review_router:
     local: issue_remediation_capa.adapters.local.review_router:LocalReviewRouter
+    live: issue_remediation_capa.adapters.local.review_router:LocalReviewRouter
     gcp: issue_remediation_capa.adapters.gcp.review_router:CloudReviewRouter
     onprem: issue_remediation_capa.adapters.onprem.review_router:OnPremReviewRouter
 
@@ -83,6 +88,7 @@ adapters:
   # correctness, so onprem is ABSENT rather than fatal, unlike the other placeholders.
   tracer:
     local: issue_remediation_capa.adapters.local.tracer:LocalNoopTracerAdapter
+    live: issue_remediation_capa.adapters.local.tracer:LocalNoopTracerAdapter
     gcp: issue_remediation_capa.adapters.gcp.tracer:CloudTracerAdapter
     onprem: issue_remediation_capa.adapters.onprem.tracer:OnPremTracerAdapter
 
@@ -91,17 +97,21 @@ adapters:
   # nothing.
   evaluation:
     local: issue_remediation_capa.adapters.local.evaluation:LocalOfflineEvalAdapter
+    live: issue_remediation_capa.adapters.local.evaluation:LocalOfflineEvalAdapter
     gcp: issue_remediation_capa.adapters.gcp.evaluation:ManagedEvalGateAdapter
     onprem: issue_remediation_capa.adapters.onprem.evaluation:OnPremEvalAdapter
   generation:
     local: issue_remediation_capa.adapters.local.generation:LocalGenerationAdapter
+    live: issue_remediation_capa.adapters.live.generation:LocalModelGenerationAdapter
     gcp: issue_remediation_capa.adapters.gcp.generation:CloudGenerationAdapter
     onprem: issue_remediation_capa.adapters.onprem.generation:OnPremGenerationAdapter
   intake:
     local: issue_remediation_capa.adapters.local.intake:LocalFixtureIntakeAdapter
+    live: issue_remediation_capa.adapters.local.intake:LocalFixtureIntakeAdapter
     gcp: issue_remediation_capa.adapters.gcp.intake:CloudIntakeAdapter
     onprem: issue_remediation_capa.adapters.onprem.intake:OnPremIntakeAdapter
   embeddings:
     local: issue_remediation_capa.adapters.local.embeddings:LocalHashingEmbeddingAdapter
+    live: issue_remediation_capa.adapters.local.embeddings:LocalHashingEmbeddingAdapter
     gcp: issue_remediation_capa.adapters.gcp.embeddings:VertexEmbeddingAdapter
     onprem: issue_remediation_capa.adapters.onprem.embeddings:OnPremEmbeddingAdapter

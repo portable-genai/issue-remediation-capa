@@ -40,6 +40,7 @@ from hex_service_kit.netdefaults import ConfiguredEmptyError
 
 from issue_remediation_capa.config import (
     KNOWN_PROFILES,
+    LAPTOP_PROFILES,
     LOCAL_PROFILE,
     PROFILE_CHOICE,
     UNCONSENTED_PROFILE,
@@ -173,7 +174,10 @@ def test_the_two_derived_postures_disagree_exactly_when_nobody_chose() -> None:
     assert unconsented.exposure_profile != unconsented.bind_profile
     for profile in KNOWN_PROFILES:
         chosen = resolve_profile({_PROFILE_ENV: profile})
-        assert chosen.exposure_profile == chosen.bind_profile == profile
+        # A deliberate laptop profile (local, or live with a real local model) takes the local
+        # posture in both directions; every other deliberate profile is carried through as named.
+        posture = LOCAL_PROFILE if profile in LAPTOP_PROFILES else profile
+        assert chosen.exposure_profile == chosen.bind_profile == posture
 
 
 def test_settings_carry_the_deliberateness_and_direct_construction_is_deliberate() -> None:

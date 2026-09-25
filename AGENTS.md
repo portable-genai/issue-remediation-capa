@@ -41,7 +41,10 @@ Hexagonal, ports and adapters:
   the `PORT_PROTOCOLS` map, plus `ports/identity.py`: what an identity adapter declares about the
   end-user authentication it provides, and the refusal type that carries a status and a reason.
 - `adapters/{local,gcp,onprem}/` are the three families. `local` is SDK-free and actually works;
-  `onprem` is a placeholder that RAISES rather than pretending.
+  `onprem` is a placeholder that RAISES rather than pretending. `adapters/live/` holds only the
+  `live` profile's model adapter: `live` binds every other port to its `local` adapter, takes the
+  `local` laptop posture (`config.LAPTOP_PROFILES`), and drafts through the local open-weight
+  model via the shared `hex_service_kit.localmodel` client (`LOCAL_MODEL_URL`, `LOCAL_MODEL`).
 - `config.py` resolves the profile and binds every port. `config/settings.yaml` carries the
   binding table, so switching a port is configuration, not a code edit.
 - `agent/` is the optional-but-scaffolded agent surface: plain tool callables plus the A2A card.

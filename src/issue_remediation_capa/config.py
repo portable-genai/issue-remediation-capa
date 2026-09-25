@@ -1,7 +1,9 @@
 """Settings + Container: profile-driven dependency injection (the hexagon wiring).
 
 One env var (``CAPA_PROFILE``) selects the adapter family for every
-port. ``local`` is the SDK-free offline default (dev/test/CI); ``gcp`` is the managed cloud
+port. ``local`` is the SDK-free offline default (dev/test/CI); ``live`` is the same laptop stack
+with the model port bound to a real local open-weight model through the shared
+``hex_service_kit.localmodel`` client; ``gcp`` is the managed cloud
 stack (SDK imports stay lazy so ``local``/``onprem`` import with no cloud SDK installed);
 ``onprem`` is the fail-fast portability placeholder. The dotted ``module:Class`` binding table
 is the single source of truth, exactly like the reference build, and it lives in
@@ -50,6 +52,7 @@ from typing import Any
 
 import yaml
 from hex_service_kit.identity import IdentityPort
+from hex_service_kit.localmodel import LocalModelSettings
 from hex_service_kit.netdefaults import ConfiguredEmptyError, EnvSetting, read_env_setting
 
 from .envread import boolean_setting, setting_or_default
@@ -70,8 +73,15 @@ _REGION = "asia-southeast1"
 DEFAULT_SETTINGS_PATH = Path("config") / "settings.yaml"
 
 LOCAL_PROFILE = "local"
+#: The laptop lane with a real model: every port binds what ``local`` binds except the model
+#: port, which calls the local open-weight model server through the shared kit client.
+LIVE_PROFILE = "live"
 #: The only profiles this service knows how to bind. Anything else is a configuration error.
-KNOWN_PROFILES: tuple[str, ...] = (LOCAL_PROFILE, "gcp", "onprem")
+KNOWN_PROFILES: tuple[str, ...] = (LOCAL_PROFILE, LIVE_PROFILE, "gcp", "onprem")
+#: The profiles that run on a laptop and take the ``local`` posture: loopback bind, seeded dev
+#: personas, the dev CORS allowlist, interactive docs. ``live`` differs from ``local`` only in
+#: which model answers, so it must not differ in who may reach it.
+LAPTOP_PROFILES: frozenset[str] = frozenset({LOCAL_PROFILE, LIVE_PROFILE})
 
 #: The profile string handed to every RELAXATION when nobody chose a profile at all. It is
 #: deliberately NOT a member of :data:`KNOWN_PROFILES` and it never reaches :class:`Settings` or
@@ -204,9 +214,12 @@ class ProfileChoice:
 
         These decisions grant something extra to ``local``, so an unconsented run must NOT look
         like ``local``: it gets :data:`UNCONSENTED_PROFILE`, which is no origin's allowlist, no
-        ``X-Dev-Persona`` and HSTS on.
+        ``X-Dev-Persona`` and HSTS on. A deliberate ``live`` reads ``local`` here: it is the same
+        laptop posture with a real model behind one port (:data:`LAPTOP_PROFILES`).
         """
-        return self.profile if self.explicit else UNCONSENTED_PROFILE
+        if not self.explicit:
+            return UNCONSENTED_PROFILE
+        return LOCAL_PROFILE if self.profile in LAPTOP_PROFILES else self.profile
 
     @property
     def bind_profile(self) -> str:
@@ -216,8 +229,11 @@ class ProfileChoice:
         ``0.0.0.0``, so here an unconsented run must look like ``local`` and stay on loopback.
         Handing :attr:`exposure_profile` to that guard instead would let an unconfigured deploy
         bind every interface, which is the exact inversion this pair of properties prevents.
+        ``live`` is a laptop profile and stays on loopback exactly like ``local``.
         """
-        return self.profile if self.explicit else LOCAL_PROFILE
+        if not self.explicit or self.profile in LAPTOP_PROFILES:
+            return LOCAL_PROFILE
+        return self.profile
 
     @property
     def service_auth_configured(self) -> bool:
@@ -288,41 +304,49 @@ _PKG = "issue_remediation_capa"
 DEFAULT_BINDINGS: dict[str, dict[str, str]] = {
     "audit": {
         "local": f"{_PKG}.adapters.local.audit:LocalAuditAdapter",
+        "live": f"{_PKG}.adapters.local.audit:LocalAuditAdapter",
         "gcp": f"{_PKG}.adapters.gcp.audit:CloudAuditAdapter",
         "onprem": f"{_PKG}.adapters.onprem.audit:OnPremAuditAdapter",
     },
     "identity": {
         "local": f"{_PKG}.adapters.local.identity:LocalIdentityAdapter",
+        "live": f"{_PKG}.adapters.local.identity:LocalIdentityAdapter",
         "gcp": f"{_PKG}.adapters.gcp.identity:IapIdentityAdapter",
         "onprem": f"{_PKG}.adapters.onprem.identity:OnPremIdentityAdapter",
     },
     "review_router": {
         "local": f"{_PKG}.adapters.local.review_router:LocalReviewRouter",
+        "live": f"{_PKG}.adapters.local.review_router:LocalReviewRouter",
         "gcp": f"{_PKG}.adapters.gcp.review_router:CloudReviewRouter",
         "onprem": f"{_PKG}.adapters.onprem.review_router:OnPremReviewRouter",
     },
     "tracer": {
         "local": f"{_PKG}.adapters.local.tracer:LocalNoopTracerAdapter",
+        "live": f"{_PKG}.adapters.local.tracer:LocalNoopTracerAdapter",
         "gcp": f"{_PKG}.adapters.gcp.tracer:CloudTracerAdapter",
         "onprem": f"{_PKG}.adapters.onprem.tracer:OnPremTracerAdapter",
     },
     "evaluation": {
         "local": f"{_PKG}.adapters.local.evaluation:LocalOfflineEvalAdapter",
+        "live": f"{_PKG}.adapters.local.evaluation:LocalOfflineEvalAdapter",
         "gcp": f"{_PKG}.adapters.gcp.evaluation:ManagedEvalGateAdapter",
         "onprem": f"{_PKG}.adapters.onprem.evaluation:OnPremEvalAdapter",
     },
     "generation": {
         "local": f"{_PKG}.adapters.local.generation:LocalGenerationAdapter",
+        "live": f"{_PKG}.adapters.live.generation:LocalModelGenerationAdapter",
         "gcp": f"{_PKG}.adapters.gcp.generation:CloudGenerationAdapter",
         "onprem": f"{_PKG}.adapters.onprem.generation:OnPremGenerationAdapter",
     },
     "intake": {
         "local": f"{_PKG}.adapters.local.intake:LocalFixtureIntakeAdapter",
+        "live": f"{_PKG}.adapters.local.intake:LocalFixtureIntakeAdapter",
         "gcp": f"{_PKG}.adapters.gcp.intake:CloudIntakeAdapter",
         "onprem": f"{_PKG}.adapters.onprem.intake:OnPremIntakeAdapter",
     },
     "embeddings": {
         "local": f"{_PKG}.adapters.local.embeddings:LocalHashingEmbeddingAdapter",
+        "live": f"{_PKG}.adapters.local.embeddings:LocalHashingEmbeddingAdapter",
         "gcp": f"{_PKG}.adapters.gcp.embeddings:VertexEmbeddingAdapter",
         "onprem": f"{_PKG}.adapters.onprem.embeddings:OnPremEmbeddingAdapter",
     },
@@ -518,6 +542,10 @@ class Settings:
             # generating, so naming a model would advertise one that never answers.
             if self.profile == "onprem":
                 return "onprem-not-implemented"
+            if self.profile == LIVE_PROFILE:
+                # The live lane's model answers from the shared local server; name the model the
+                # kit client will call, read through the same three-state setting it reads.
+                return LocalModelSettings.from_env().model
             return "deterministic-offline-stub"
         # Managed. The id lives in settings in most of the fleet and on the adapter in a few,
         # so both are read here and the banner never names a model the binding does not use.
