@@ -82,12 +82,16 @@ deterministic fallback note is used instead. The groundedness checks are module-
 functions rather than private methods, deliberately, so the eval measures the RAW model output
 through the very same contract the service enforces: a metric that watched only the filtered
 output could never go red. Crucially, nothing the model writes can flip `closure_gaps` or
-authorise a closure.
+authorise a closure. Before any of that, the guardrail (rule R1) screens the prompt before the
+model sees it and the reply before it is parsed (Model Armor under `gcp`, failing closed); a
+refusal is audited `BLOCKED` and the same deterministic note is used.
 
 The second model surface is the embeddings port, and it carries a different exposure: under `gcp`
 the issue subject and description are SENT to a managed embedding model to produce vectors for
 clustering. Nothing comes back but numbers, and no decision is taken from them beyond which theme
-an issue joins, but the text has left the process. Prompt-injection screening through the `agent-guardrail-gateway` is **not** wired yet on either path.
+an issue joins, but the text has left the process. This path is not screened by the guardrail: it
+generates no text and follows no instruction, so an injected description can at most move a theme
+boundary.
 
 ### How is the audit trail protected?
 
@@ -113,7 +117,6 @@ regular expression cannot tell apart.
 
 - **Login.** This repo authenticates nobody itself: the platform in front of it does, and the UI
   forwards the assertion without parsing or trusting a parsed copy.
-- **Injection defence and output filtering.** Owned by `agent-guardrail-gateway`; not bound yet.
 - **The review queue.** Owned by `human-review-console`; this repo produces escalations and routes them.
 - **Raising the issue.** Owned by `internal-audit-lifecycle`, `continuous-controls-monitoring`, `compliance-advisory` and `complaints-review`. This repo normalizes what they raise
   and never re-derives a finding's severity or re-runs a control test.

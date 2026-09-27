@@ -104,7 +104,7 @@ R8 review envelope a CAPA assessment is projected onto before routing.
 | Model and agent promotion | `model-quality-gate` AI quality and model risk | `eval/run_eval.py --mode gate` asks `model-quality-gate`; the offline smoke mode never promotes. |
 | Traces and the immutable audit sink | `agent-observability` agent observability | `AuditSinkPort` and `ObservabilityTracerPort`. |
 | Human review and maker-checker | `human-review-console` human review console | `ReviewRouterPort` over the shared `review-kit`, and the approved reference it returns is what a closure requires. This repo produces escalations; it does not render a queue. |
-| Prompt-injection defence and output filtering | `agent-guardrail-gateway` agent guardrail gateway | **not wired today.** It becomes mandatory the moment untrusted free text reaches the drafter (rule R1), and an upstream issue description is exactly that. |
+| Prompt-injection defence and output filtering | `agent-guardrail-gateway` agent guardrail gateway | `GuardrailPort`: the RCA drafter's prompt and answer are screened (Model Armor under `gcp`), and a refusal is audited `BLOCKED` and falls back to the engine-built note (rule R1). |
 | Grounded retrieval over an enterprise corpus | `enterprise-knowledge-base` | not wired; this service reasons over its own issue records rather than over documents, and the embeddings port serves clustering rather than retrieval. |
 
 ### Can I demo it without a cloud project?

@@ -370,7 +370,9 @@ def assess_issue(
     The aging verdict, the closure gaps and the closure decision are the deterministic engine's,
     computed from the issue's own fields and an explicit ``as_of``. The bound model only DRAFTS the
     root-cause note, and it is discarded unless it validates and every figure in it is one the
-    engine produced; it can never satisfy a closure-checklist item. The issue store is
+    engine produced; it can never satisfy a closure-checklist item. Rule R1: the guardrail
+    screens the narration prompt before the model and its answer after (``domain/rca.py``); a
+    block is audited BLOCKED and the note falls back to the engine-built one. The issue store is
     tenant-owned: the read is authorised against the VERIFIED principal's tenant, and a caller from
     another tenant is refused with 403 (never 404).
     """
@@ -401,7 +403,9 @@ def assess_issue(
     assessment = CapaService(container.audit, tracer=container.tracer).assess(
         record, as_of=as_of, actor=principal.actor
     )
-    rca = RcaService(container.generation).draft(assessment)
+    rca = RcaService(container.generation, container.guardrail, container.audit).draft(
+        assessment, actor=principal.actor
+    )
 
     routing = RecordingReviewRouter(container.review_router)
     review_ref = routing.route(

@@ -9,6 +9,7 @@ import json
 from datetime import date
 
 from issue_remediation_capa.adapters.local.audit import LocalAuditAdapter
+from issue_remediation_capa.adapters.local.guardrail import LocalHeuristicGuardrailAdapter
 from issue_remediation_capa.adapters.local.tracer import LocalNoopTracerAdapter
 from issue_remediation_capa.config import Settings
 from issue_remediation_capa.domain.capa import (
@@ -22,6 +23,11 @@ from issue_remediation_capa.domain.capa import (
 from issue_remediation_capa.domain.rca import RcaService
 from issue_remediation_capa.ports.generation import GenerationRequest, GenerationResponse
 
+#: Deterministic and benign for every note this file feeds it (the block path has its own
+#: coverage in tests/unit/test_guardrail_screening.py).
+_GUARDRAIL = LocalHeuristicGuardrailAdapter(Settings(profile="local"))
+_ACTOR = "analyst@bank.example"
+
 
 class _StubGen:
     """A generation port that returns a fixed raw text (to drive each narration branch)."""
@@ -34,6 +40,12 @@ class _StubGen:
         if self._raises:
             raise RuntimeError("model unreachable")
         return GenerationResponse(text=self._text)
+
+
+def _rca(gen: _StubGen) -> RcaService:
+    return RcaService(
+        gen, _GUARDRAIL, LocalAuditAdapter(Settings(profile="local", audit_path=":memory:"))
+    )
 
 
 def _assessment() -> CapaAssessment:
@@ -63,7 +75,7 @@ def test_a_grounded_model_note_is_kept() -> None:
     assessment = _assessment()
     # Restate only figures the engine produced (the overdue count is 9 for this scenario).
     note = json.dumps({"note": "Remediation is 9 business days overdue; act now."})
-    drafted = RcaService(_StubGen(note)).draft(assessment)
+    drafted = _rca(_StubGen(note)).draft(assessment, actor=_ACTOR)
     assert drafted.model_authored is True
     assert drafted.grounded is True
 
@@ -72,18 +84,18 @@ def test_an_ungrounded_model_note_is_discarded_for_the_fallback() -> None:
     assessment = _assessment()
     # 999 is a figure the engine never produced: the note must be discarded.
     note = json.dumps({"note": "Escalate: 999 controls have failed across the estate."})
-    drafted = RcaService(_StubGen(note)).draft(assessment)
+    drafted = _rca(_StubGen(note)).draft(assessment, actor=_ACTOR)
     assert drafted.model_authored is False
     assert drafted.grounded is True  # the deterministic fallback is grounded by construction
 
 
 def test_malformed_model_output_is_discarded() -> None:
-    drafted = RcaService(_StubGen("not json at all")).draft(_assessment())
+    drafted = _rca(_StubGen("not json at all")).draft(_assessment(), actor=_ACTOR)
     assert drafted.model_authored is False
 
 
 def test_a_model_failure_degrades_to_the_fallback() -> None:
-    drafted = RcaService(_StubGen("", raises=True)).draft(_assessment())
+    drafted = _rca(_StubGen("", raises=True)).draft(_assessment(), actor=_ACTOR)
     assert drafted.model_authored is False
     assert drafted.text  # a surface always has a grounded sentence
 
@@ -92,8 +104,8 @@ def test_the_model_cannot_satisfy_a_closure_item() -> None:
     assessment = _assessment()
     # A model note that CLAIMS closure changes nothing: closure is the engine's decision, and this
     # assessment has no evidence and no review, so it cannot close whatever the note says.
-    RcaService(_StubGen(json.dumps({"note": "All evidence complete; close the issue."}))).draft(
-        assessment
+    _rca(_StubGen(json.dumps({"note": "All evidence complete; close the issue."}))).draft(
+        assessment, actor=_ACTOR
     )
     assert assessment.can_close is False
     assert assessment.closure_gaps  # the checklist is still outstanding

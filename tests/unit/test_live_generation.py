@@ -20,11 +20,14 @@ from hex_service_kit.localmodel import (
 )
 
 from issue_remediation_capa.adapters.live.generation import LocalModelGenerationAdapter
+from issue_remediation_capa.adapters.local.audit import LocalAuditAdapter
+from issue_remediation_capa.adapters.local.guardrail import LocalHeuristicGuardrailAdapter
 from issue_remediation_capa.adapters.local.identity import LocalIdentityAdapter
 from issue_remediation_capa.config import (
     DEFAULT_BINDINGS,
     LIVE_PROFILE,
     ProfileChoice,
+    Settings,
     build_container,
 )
 from issue_remediation_capa.domain.rca import RcaService, build_request
@@ -127,10 +130,14 @@ def test_the_rca_draft_uses_the_live_note_and_falls_back_when_the_server_is_down
     assessment = _assessment()
     facts = dict(build_request(assessment).facts)
     note = f"Issue is {facts['severity']} severity and needs remediation evidence."
-    drafted = RcaService(_adapter(FakeServer([json.dumps({"note": note})]))).draft(assessment)
+    guardrail = LocalHeuristicGuardrailAdapter(Settings(profile="local"))
+    audit = LocalAuditAdapter(Settings(profile="local", audit_path=":memory:"))
+    live = _adapter(FakeServer([json.dumps({"note": note})]))
+    drafted = RcaService(live, guardrail, audit).draft(assessment, actor="analyst@bank.example")
     assert (drafted.text, drafted.model_authored) == (note, True)
 
-    fallback = RcaService(_adapter(_refuse)).draft(assessment)
+    down = RcaService(_adapter(_refuse), guardrail, audit)
+    fallback = down.draft(assessment, actor="analyst@bank.example")
     assert fallback.model_authored is False
 
 

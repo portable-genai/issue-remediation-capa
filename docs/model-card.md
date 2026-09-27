@@ -84,11 +84,12 @@ a verdict or a closure.
   managed-profile run, registered with the `model-quality-gate` promotion gate (P-08, rule R5), that scores
   `rca_groundedness` with the real generation model bound and `theme_purity` with the real
   embedder bound.
-- **Prompt-injection screening** (rule R1): the `agent-guardrail-gateway` is not bound, and this repo
-  needs it. The facts block carries engine values rather than free text, which keeps the generation
-  path narrow, but the issue subject and description that reach the EMBEDDING call are untrusted
-  text from an upstream feed. Screen them, and fail closed to deterministic-only when the screen is
-  unavailable.
+- **Prompt-injection screening** (rule R1): bound. The RCA prompt is screened before the model and
+  the answer after (`domain/rca.py`, Model Armor under `gcp`); a refusal, or a screen that cannot
+  decide, is audited `BLOCKED` and the note falls back to the engine-built one. The embedding call
+  is not screened: it generates no text and follows no instruction, and its vectors feed only the
+  deterministic clustering, so an injected description can move a theme boundary (which
+  `theme_purity` measures) but cannot steer an answer.
 - **Reasoning trace**: the audit record carries the engine assessment and its citations, not the
   prompt and reply pair. `COMPLIANCE.md` P-07 records that as owed.
 

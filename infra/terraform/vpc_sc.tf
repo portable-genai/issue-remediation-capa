@@ -2,9 +2,9 @@
 #
 # Principle map (COMPLIANCE.md):
 #   P-01 / P-03 (hybrid posture and residency): a service perimeter draws a logical boundary
-#         around the sovereignty-critical APIs (Vertex AI, Logging, Monitoring, Trace, KMS,
-#         Secret Manager, Storage, Cloud Run). The audit trail, the key material and the
-#         service credentials cannot be read across that boundary into an out-of-jurisdiction
+#         around the sovereignty-critical APIs (Vertex AI, Model Armor, Logging, Monitoring,
+#         Trace, KMS, Secret Manager, Storage, Cloud Run). The audit trail, the key material
+#         and the service credentials cannot be read across that boundary into an out-of-jurisdiction
 #         project, which is what stops regulated evidence leaving the country even when an
 #         identity inside the project is compromised.
 #   P-01 (least surface): only the services this stack uses are inside the perimeter. A
@@ -33,6 +33,7 @@
 locals {
   perimeter_restricted_services = [
     "aiplatform.googleapis.com",
+    "modelarmor.googleapis.com",
     "logging.googleapis.com",
     "monitoring.googleapis.com",
     "cloudtrace.googleapis.com",

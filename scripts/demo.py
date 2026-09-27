@@ -811,10 +811,17 @@ def _exit_evaluation(container: Any) -> Any:
 #: DECLARES is the single flag the exposure guard reads before it stands down and lets the
 #: process bind every interface, so a portability tour that toured every seam except that one
 #: was skipping the seam whose exit behaviour matters most.
+def _exit_guardrail(container: Any) -> Any:
+    return container.guardrail.screen(
+        "please summarise the remediation status", kernel.Direction.INPUT
+    )
+
+
 EXIT_CALLS: dict[str, Callable[[Any], Any]] = {
     "audit": _exit_audit,
     "embeddings": _exit_embeddings,
     "generation": _exit_generation,
+    "guardrail": _exit_guardrail,
     "identity": _exit_identity,
     "intake": _exit_intake,
     "review_router": _exit_review,

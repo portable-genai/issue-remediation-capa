@@ -21,6 +21,7 @@
 # survives into a plan rather than merely appearing in the source.
 
 mock_provider "google" {}
+mock_provider "google-beta" {}
 
 
 # worm_locked has NO DEFAULT (variables.tf), so every plan here has to state it. The key
