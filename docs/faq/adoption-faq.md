@@ -115,8 +115,7 @@ diverge, keep the step keys and the `facts` dict the checks read.
 ### What is still open?
 
 [`../practices-audit.md`](../practices-audit.md) carries the per-check verdict and the work list.
-The three that matter most before production: the durable issue store (which is also what moves
-the closure preconditions off the request body), binding the `agent-guardrail-gateway` before
-upstream issue text reaches the drafter, and registering this repo's metric bundle with `model-quality-gate` so
+The two that matter most before production: the durable issue store (which is also what moves
+the closure preconditions off the request body), and registering this repo's metric bundle with `model-quality-gate` so
 `eval/run_eval.py --mode gate` has an authority to ask. The Terraform stack is written, validated
 and tested against a mocked provider; it has never been applied.

@@ -121,7 +121,8 @@ an embedding model produces vectors for clustering and nothing else. The offline
 metric measures raw model output rather than filtered output so it can go red. What is NOT yet in
 place: neither model is pinned to a confirmed id and version for the deployment region, there is
 no token budget, rate limit or kill switch, no live-model eval run has been registered with the
-`model-quality-gate` promotion gate, and prompt-injection screening through `agent-guardrail-gateway` is not bound. Until those close,
+`model-quality-gate` promotion gate. Prompt-injection screening is bound (rule R1: Model Armor
+screens the RCA prompt and answer, and a refusal falls back to the engine-built note). Until those close,
 the managed model paths are not production-cleared and the deterministic path is what should be
 relied on.
 
@@ -140,6 +141,6 @@ closure checklists: those are the numbers a regulator asks about.
 The `Partial` and `TODO (repo owner)` rows in `COMPLIANCE.md`, each of which names exactly what is
 missing. The ones that need a risk acceptance if you go live without them: the durable issue store
 and its object-level authorisation (which is also what moves the closure preconditions off the
-request body), rule R1 (the `agent-guardrail-gateway` binding), rule R5 and P-08 (the `model-quality-gate` metric bundle),
+request body), rule R5 and P-08 (the `model-quality-gate` metric bundle),
 P-10 (timeouts, circuit breaker and a documented kill switch), and P-01's private-egress rule,
 which depends on your own network rather than on this repo.

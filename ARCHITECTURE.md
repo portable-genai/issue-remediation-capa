@@ -19,8 +19,10 @@ startup and Terraform serving authorization until its live integration test exis
 - `domain/` : pure stdlib, no cloud/framework imports. `kernel.py` (vertical-neutral types,
   `StrEnum` taxonomies from the commons), `models.py` (the triage artifacts), `pii.py` (the
   jurisdiction pattern selection + order), `triage_service.py` (the deterministic engine).
-- `ports/` : `@runtime_checkable` Protocols (`AuditSinkPort`, `ReviewRouterPort`; identity uses
-  the commons `IdentityPort`), re-exported once with the `PORT_PROTOCOLS` map. `identity.py` adds
+- `ports/` : `@runtime_checkable` Protocols (`AuditSinkPort`, `GuardrailPort`, `ReviewRouterPort`;
+  identity uses the commons `IdentityPort`), re-exported once with the `PORT_PROTOCOLS` map.
+  `guardrail.py` screens the one generation call, the RCA narration (`domain/rca.py`), INPUT
+  before the model and OUTPUT before the answer is used (rule R1); `identity.py` adds
   this service's own identity vocabulary: what an adapter DECLARES about the end-user
   authentication it provides (`VERIFIED` / `CLIENT_ASSERTED` / `UNIMPLEMENTED`), which is what the
   loopback exposure guard reads, plus the refusal type that carries a status and a reason when no
@@ -64,10 +66,17 @@ review maker are both the verified `Principal`, never the request body. Routing 
 same request that produced the result, on the API and CLI surfaces alike, so an escalation never
 depends on a later job that may not exist.
 
+The RCA narration on `/v1/issues/assess` (`RcaService.draft`) runs after the assessment is
+scored and audited: **guardrail screen INPUT on the prompt (R1)** -> model -> **guardrail screen
+OUTPUT on the answer (R1)** -> schema and groundedness checks. A refusal in either direction, or
+a guardrail that cannot decide, is audited `BLOCKED` and the note falls back to the engine-built
+one; the narration is optional by design, so the assessment itself is never withheld.
+
 ## The port table
 | Port | local | gcp | onprem |
 |---|---|---|---|
 | `AuditSinkPort` | hash-chained SQLite WORM (commons) | Cloud Logging WORM (lazy) | placeholder |
+| `GuardrailPort` | heuristic prompt-injection screen | regional Model Armor template (lazy) | placeholder |
 | `IdentityPort` | seeded personas (commons) | IAP assertion (lazy) | placeholder |
 | `ReviewRouterPort` | review-kit outbox (offline, inspectable) | `human-review-console` service intake over S2S | placeholder |
 

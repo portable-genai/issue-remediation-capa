@@ -168,11 +168,12 @@ rather than tracking remediation themselves. What it integrates rather than rebu
 - `agent-registry`: this agent publishes its A2A card at
   `/.well-known/agent-card.json`; register it rather than inventing a discovery mechanism.
 
-The guardrail gateway (`agent-guardrail-gateway`) is **not** integrated today, and the enterprise knowledge base
-(`enterprise-knowledge-base`) is not either: this service reasons over its own issue records rather than over a document
-corpus, and the embeddings port serves clustering rather than retrieval. `agent-guardrail-gateway` becomes mandatory
-the moment untrusted free text reaches the drafter, and an issue description from an upstream feed
-is exactly that: see rule R1 in [`../COMPLIANCE.md`](../COMPLIANCE.md).
+The guardrail (`agent-guardrail-gateway`'s Model Armor half) is bound through `GuardrailPort`: the RCA
+drafter's prompt is screened before the model and its answer after, and a refusal is audited and
+falls back to the engine-built note (rule R1 in [`../COMPLIANCE.md`](../COMPLIANCE.md)). The
+enterprise knowledge base (`enterprise-knowledge-base`) is not integrated: this service reasons over
+its own issue records rather than over a document corpus, and the embeddings port serves clustering
+rather than retrieval.
 
 ## 6. Adoption checklist
 
