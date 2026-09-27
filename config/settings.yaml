@@ -101,10 +101,11 @@ adapters:
     gcp: issue_remediation_capa.adapters.gcp.review_router:CloudReviewRouter
     onprem: issue_remediation_capa.adapters.onprem.review_router:OnPremReviewRouter
 
-  # Tracing. Which BACKEND a deployed profile exports to is not a binding: the gcp
-  # adapter reads OTEL_EXPORTER_OTLP_ENDPOINT and sends OTLP to the agent-observability collector when it
-  # is set, straight to Cloud Trace when it is not. Tracing is not essential to
-  # correctness, so onprem is ABSENT rather than fatal, unlike the other placeholders.
+  # Tracing. Which BACKEND a deployed profile exports to is not a binding: the gcp adapter sends
+  # OTLP to the agent-observability collector named by OTEL_EXPORTER_OTLP_ENDPOINT, and the commons
+  # refuses to build a tracer when that is unset or empty: exporting straight to Cloud Trace would
+  # skip the collector's GenAI-content redaction. Tracing is not essential to correctness, so onprem
+  # is ABSENT rather than fatal, unlike the other placeholders.
   tracer:
     local: issue_remediation_capa.adapters.local.tracer:LocalNoopTracerAdapter
     live: issue_remediation_capa.adapters.local.tracer:LocalNoopTracerAdapter
