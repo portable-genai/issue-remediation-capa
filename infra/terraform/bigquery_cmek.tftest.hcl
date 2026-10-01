@@ -28,6 +28,11 @@ mock_provider "google-beta" {}
 # assertions below do not depend on it, so the production form is stated once for the file.
 variables {
   worm_locked = true
+  # Slice 7 turned these reversible controls off by default on 2026-10-01. The runs in this
+  # file were written under the old default, so the file states it; a run that sets one
+  # explicitly still overrides it. posture_defaults.tftest.hcl pins the new default.
+  enable_vpc_sc       = true
+  enable_org_policies = true
 }
 
 run "every_table_declares_the_datasets_key" {
